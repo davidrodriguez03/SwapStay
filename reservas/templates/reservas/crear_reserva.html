@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Crear Reserva</title>
+</head>
+<body>
+    <h1>Crear Reserva</h1>
+    
+    {% if messages %}
+        {% for message in messages %}
+            <p style="color: green;">{{ message }}</p>
+        {% endfor %}
+    {% endif %}
+    
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Crear Reserva</button>
+    </form>
+    
+    <p><a href="{% url 'admin:index' %}">Volver al admin</a></p>
+</body>
+</html>
