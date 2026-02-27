@@ -20,7 +20,7 @@ from django.urls import path, include
 from config.views import home 
 
 urlpatterns = [
-    path('', home), 
     path('admin/', admin.site.urls),
+    path('api/', include('reservas.api_urls')),  
     path('reservas/', include('reservas.urls')),
 ]
