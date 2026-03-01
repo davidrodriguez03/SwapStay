@@ -32,6 +32,22 @@ class Alojamiento(models.Model):
     def __str__(self):
         return f"{self.nombre} - {self.ciudad}"
 
+class Casa(Alojamiento):
+    numero_pisos = models.IntegerField()
+    tiene_patio = models.BooleanField()
+    tiene_garaje = models.BooleanField()
+
+    def __str__(self):
+        return f"Casa: {self.nombre} - {self.ciudad}"
+
+class Apartamento(Alojamiento):
+    numero_piso = models.IntegerField() 
+    tiene_ascensor = models.BooleanField(default=False)
+    tiene_porteria = models.BooleanField(default=False)
+    
+    def __str__(self):
+        return f"Apartamento: {self.nombre} - {self.ciudad}"
+
 
 class Reserva(models.Model):
     ESTADO_CHOICES = [
