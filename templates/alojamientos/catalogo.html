@@ -1,0 +1,229 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Explorar Alojamientos{% endblock %}
+{% block nav_catalogo %}active{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-0">
+
+    <!-- Page Header -->
+    <div class="bg-primary py-5 text-white">
+        <div class="container">
+            <h1 class="fw-bold mb-2">
+                <i class="fa-solid fa-magnifying-glass me-3"></i>Explorar alojamientos
+            </h1>
+            <p class="text-white-75 mb-0">
+                {% if alojamientos %}
+                    {{ alojamientos|length }} resultado{% if alojamientos|length != 1 %}s{% endif %} encontrado{% if alojamientos|length != 1 %}s{% endif %}
+                {% else %}
+                    Sin resultados para tu búsqueda
+                {% endif %}
+            </p>
+        </div>
+    </div>
+
+    <div class="container py-5" x-data="catalogo()">
+        <div class="row g-4">
+
+            <!-- Sidebar filtros -->
+            <div class="col-lg-3">
+                <div class="card border-0 shadow-sm rounded-4 sticky-top" style="top: 80px;">
+                    <div class="card-header bg-white border-0 pt-4 px-4 pb-2">
+                        <h6 class="fw-bold mb-0">
+                            <i class="fa-solid fa-sliders me-2 text-primary"></i>Filtros
+                        </h6>
+                    </div>
+                    <div class="card-body px-4 pb-4">
+                        <form method="get" id="filtros-form">
+
+                            <div class="mb-4">
+                                <label class="form-label small fw-semibold text-muted text-uppercase">Ciudad</label>
+                                <div class="input-group input-group-sm">
+                                    <span class="input-group-text bg-light"><i class="fa-solid fa-location-dot text-primary"></i></span>
+                                    <input type="text" name="ciudad" class="form-control"
+                                           value="{{ request.GET.ciudad }}"
+                                           placeholder="Ej: Bogotá...">
+                                </div>
+                            </div>
+
+                            <div class="mb-4">
+                                <label class="form-label small fw-semibold text-muted text-uppercase">Tipo de alojamiento</label>
+                                <div class="d-flex flex-column gap-2">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="tipo" id="tipoTodos"
+                                               value="" {% if not request.GET.tipo %}checked{% endif %}>
+                                        <label class="form-check-label small" for="tipoTodos">Todos</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="tipo" id="tipoCasa"
+                                               value="casa" {% if request.GET.tipo == 'casa' %}checked{% endif %}>
+                                        <label class="form-check-label small" for="tipoCasa">
+                                            <i class="fa-solid fa-house me-1 text-muted"></i>Casa
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="tipo" id="tipoApto"
+                                               value="apartamento" {% if request.GET.tipo == 'apartamento' %}checked{% endif %}>
+                                        <label class="form-check-label small" for="tipoApto">
+                                            <i class="fa-solid fa-building me-1 text-muted"></i>Apartamento
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mb-4">
+                                <label class="form-label small fw-semibold text-muted text-uppercase">
+                                    Precio máximo
+                                    <span class="text-primary fw-bold" x-text="'$' + precioMax.toLocaleString('es-CO')"></span>
+                                </label>
+                                <input type="range" class="form-range" name="precio_max"
+                                       min="500000" max="5000000" step="100000"
+                                       :value="precioMax"
+                                       @input="precioMax = parseInt($event.target.value)"
+                                       value="{{ request.GET.precio_max|default:'5000000' }}">
+                                <div class="d-flex justify-content-between small text-muted">
+                                    <span>$500K</span>
+                                    <span>$5M</span>
+                                </div>
+                            </div>
+
+                            <div class="mb-4">
+                                <label class="form-label small fw-semibold text-muted text-uppercase">Solo disponibles</label>
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" name="disponible"
+                                           id="switchDisponible" value="1"
+                                           {% if request.GET.disponible != '0' %}checked{% endif %}>
+                                    <label class="form-check-label small" for="switchDisponible">
+                                        Mostrar solo disponibles
+                                    </label>
+                                </div>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary w-100 fw-semibold">
+                                <i class="fa-solid fa-filter me-2"></i>Aplicar filtros
+                            </button>
+                            <a href="{% url 'catalogo' %}" class="btn btn-outline-secondary w-100 mt-2 btn-sm">
+                                <i class="fa-solid fa-rotate-left me-1"></i>Limpiar
+                            </a>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Resultados -->
+            <div class="col-lg-9">
+
+                <!-- Barra de ordenamiento -->
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div class="d-flex gap-2 flex-wrap">
+                        {% if request.GET.ciudad %}
+                        <span class="badge bg-primary-subtle text-primary rounded-pill px-3 py-2">
+                            <i class="fa-solid fa-location-dot me-1"></i>{{ request.GET.ciudad }}
+                            <a href="?{% if request.GET.tipo %}tipo={{ request.GET.tipo }}&{% endif %}{% if request.GET.precio_max %}precio_max={{ request.GET.precio_max }}{% endif %}" class="ms-1 text-primary text-decoration-none">×</a>
+                        </span>
+                        {% endif %}
+                        {% if request.GET.tipo %}
+                        <span class="badge bg-secondary-subtle text-secondary rounded-pill px-3 py-2">
+                            {{ request.GET.tipo|capfirst }}
+                        </span>
+                        {% endif %}
+                    </div>
+                    <select name="orden" class="form-select form-select-sm w-auto" onchange="this.form.submit()">
+                        <option>Ordenar por...</option>
+                        <option value="precio_asc" {% if request.GET.orden == 'precio_asc' %}selected{% endif %}>Precio: menor a mayor</option>
+                        <option value="precio_desc" {% if request.GET.orden == 'precio_desc' %}selected{% endif %}>Precio: mayor a menor</option>
+                    </select>
+                </div>
+
+                {% if alojamientos %}
+                <div class="row g-4">
+                    {% for alojamiento in alojamientos %}
+                    <div class="col-md-6 col-xl-4">
+                        <div class="card border-0 shadow-sm h-100 alojamiento-card rounded-4 overflow-hidden">
+                            <!-- Imagen placeholder con gradiente -->
+                            <div class="alojamiento-img-placeholder d-flex align-items-center justify-content-center position-relative"
+                                 style="background: linear-gradient(135deg, {% cycle '#1a73e8' '#0d9488' '#7c3aed' '#dc2626' '#d97706' %} 0%, {% cycle '#4d90fe' '#2dd4bf' '#a78bfa' '#f87171' '#fbbf24' %} 100%);">
+                                <i class="fa-solid fa-{% if alojamiento.tipo == 'Casa' %}house{% else %}building{% endif %} fa-3x text-white opacity-50"></i>
+                                {% if alojamiento.disponible %}
+                                <span class="badge bg-success position-absolute top-0 end-0 m-2">Disponible</span>
+                                {% else %}
+                                <span class="badge bg-secondary position-absolute top-0 end-0 m-2">No disponible</span>
+                                {% endif %}
+                                <span class="badge bg-white text-dark position-absolute top-0 start-0 m-2 small">
+                                    <i class="fa-solid fa-{% if alojamiento.tipo == 'Casa' %}house{% else %}building{% endif %} me-1"></i>
+                                    {{ alojamiento.tipo }}
+                                </span>
+                            </div>
+
+                            <div class="card-body p-3">
+                                <h6 class="fw-bold mb-1 text-truncate">{{ alojamiento.nombre }}</h6>
+                                <p class="text-muted small mb-2">
+                                    <i class="fa-solid fa-location-dot me-1 text-primary"></i>
+                                    {{ alojamiento.ciudad }}
+                                </p>
+                                <p class="text-muted small mb-3 text-truncate">
+                                    <i class="fa-solid fa-road me-1"></i>{{ alojamiento.direccion }}
+                                </p>
+
+                                {% if alojamiento.tipo == 'Casa' %}
+                                <div class="d-flex gap-3 mb-3">
+                                    {% if alojamiento.tiene_patio %}
+                                    <span class="small text-muted"><i class="fa-solid fa-tree me-1 text-success"></i>Patio</span>
+                                    {% endif %}
+                                    {% if alojamiento.tiene_garaje %}
+                                    <span class="small text-muted"><i class="fa-solid fa-car me-1 text-muted"></i>Garaje</span>
+                                    {% endif %}
+                                </div>
+                                {% elif alojamiento.tipo == 'Apartamento' %}
+                                <div class="d-flex gap-3 mb-3">
+                                    {% if alojamiento.tiene_ascensor %}
+                                    <span class="small text-muted"><i class="fa-solid fa-elevator me-1 text-info"></i>Ascensor</span>
+                                    {% endif %}
+                                    {% if alojamiento.tiene_porteria %}
+                                    <span class="small text-muted"><i class="fa-solid fa-shield me-1 text-success"></i>Portería</span>
+                                    {% endif %}
+                                </div>
+                                {% endif %}
+                            </div>
+                            <div class="card-footer bg-white border-0 px-3 pb-3 d-flex justify-content-between align-items-center">
+                                <div>
+                                    <span class="fw-bold text-primary fs-5">${{ alojamiento.precio_mensual|floatformat:0 }}</span>
+                                    <span class="text-muted small"> COP/mes</span>
+                                </div>
+                                <a href="{% url 'detalle_alojamiento' alojamiento.pk %}"
+                                   class="btn btn-primary btn-sm fw-semibold">
+                                    Ver detalle <i class="fa-solid fa-arrow-right ms-1"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="text-center py-5">
+                    <div class="mb-4">
+                        <i class="fa-solid fa-house-circle-xmark fa-4x text-muted opacity-50"></i>
+                    </div>
+                    <h5 class="fw-bold text-muted">No se encontraron alojamientos</h5>
+                    <p class="text-muted">Intenta con otros filtros o explora todas las opciones</p>
+                    <a href="{% url 'catalogo' %}" class="btn btn-primary">
+                        <i class="fa-solid fa-rotate-left me-2"></i>Ver todos
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function catalogo() {
+    return {
+        precioMax: {{ request.GET.precio_max|default:'5000000' }},
+    };
+}
+</script>
+{% endblock %}

@@ -1,0 +1,178 @@
+# SwapStay — English Translation
+# Copyright (C) 2026 SwapStay
+msgid ""
+msgstr ""
+"Project-Id-Version: SwapStay 2.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-05-19 00:00+0000\n"
+"PO-Revision-Date: 2026-05-19 00:00+0000\n"
+"Last-Translator: SwapStay Team\n"
+"Language: en\n"
+"Language-Team: English\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+# ── Navigation ────────────────────────────────────────────────────────────────
+msgid "Home"
+msgstr "Home"
+
+msgid "Explore"
+msgstr "Explore"
+
+msgid "Dashboard"
+msgstr "Dashboard"
+
+msgid "Login"
+msgstr "Login"
+
+msgid "Register"
+msgstr "Register"
+
+msgid "Logout"
+msgstr "Logout"
+
+# ── Landing ───────────────────────────────────────────────────────────────────
+msgid "Find your home abroad"
+msgstr "Find your home abroad"
+
+msgid "Student housing for international students in Colombia"
+msgstr "Student housing for international students in Colombia"
+
+msgid "Search"
+msgstr "Search"
+
+msgid "City"
+msgstr "City"
+
+msgid "Type"
+msgstr "Type"
+
+msgid "Max price"
+msgstr "Max price"
+
+msgid "How it works"
+msgstr "How it works"
+
+msgid "Featured listings"
+msgstr "Featured listings"
+
+# ── Listings ──────────────────────────────────────────────────────────────────
+msgid "Available"
+msgstr "Available"
+
+msgid "Not available"
+msgstr "Not available"
+
+msgid "House"
+msgstr "House"
+
+msgid "Apartment"
+msgstr "Apartment"
+
+msgid "Monthly price"
+msgstr "Monthly price"
+
+msgid "per month"
+msgstr "per month"
+
+msgid "Book now"
+msgstr "Book now"
+
+msgid "View details"
+msgstr "View details"
+
+# ── Reservations ──────────────────────────────────────────────────────────────
+msgid "Create reservation"
+msgstr "Create reservation"
+
+msgid "Start date"
+msgstr "Start date"
+
+msgid "End date"
+msgstr "End date"
+
+msgid "Total amount"
+msgstr "Total amount"
+
+msgid "Confirm"
+msgstr "Confirm"
+
+msgid "Cancel"
+msgstr "Cancel"
+
+msgid "Confirmed"
+msgstr "Confirmed"
+
+msgid "Pending"
+msgstr "Pending"
+
+msgid "Cancelled"
+msgstr "Cancelled"
+
+# ── Dashboard ─────────────────────────────────────────────────────────────────
+msgid "My reservations"
+msgstr "My reservations"
+
+msgid "Total reservations"
+msgstr "Total reservations"
+
+msgid "Currency converter"
+msgstr "Currency converter"
+
+# ── Authentication ────────────────────────────────────────────────────────────
+msgid "Username"
+msgstr "Username"
+
+msgid "Password"
+msgstr "Password"
+
+msgid "Email"
+msgstr "Email"
+
+msgid "First name"
+msgstr "First name"
+
+msgid "Last name"
+msgstr "Last name"
+
+msgid "Sign in"
+msgstr "Sign in"
+
+msgid "Create account"
+msgstr "Create account"
+
+msgid "Already have an account?"
+msgstr "Already have an account?"
+
+msgid "Don't have an account?"
+msgstr "Don't have an account?"
+
+# ── General ───────────────────────────────────────────────────────────────────
+msgid "Loading..."
+msgstr "Loading..."
+
+msgid "Error"
+msgstr "Error"
+
+msgid "Success"
+msgstr "Success"
+
+msgid "Save"
+msgstr "Save"
+
+msgid "Back"
+msgstr "Back"
+
+msgid "Next"
+msgstr "Next"
+
+msgid "days"
+msgstr "days"
+
+msgid "months"
+msgstr "months"
+
+msgid "Language"
+msgstr "Language"

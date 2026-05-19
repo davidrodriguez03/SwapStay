@@ -1,6 +1,22 @@
 from django.urls import path
-from .views import CrearReservaView
+from .views import (
+    LandingView,
+    LoginView,
+    RegisterView,
+    LogoutView,
+    DashboardView,
+    CatalogoView,
+    DetalleAlojamientoView,
+    CrearReservaView,
+)
 
 urlpatterns = [
-    path('crear/', CrearReservaView.as_view(), name='crear'),
+    path('',            LandingView.as_view(),             name='landing'),
+    path('login/',      LoginView.as_view(),               name='login'),
+    path('registro/',   RegisterView.as_view(),            name='register'),
+    path('logout/',     LogoutView.as_view(),              name='logout'),
+    path('dashboard/',  DashboardView.as_view(),           name='dashboard'),
+    path('explorar/',   CatalogoView.as_view(),            name='catalogo'),
+    path('alojamiento/<int:pk>/', DetalleAlojamientoView.as_view(), name='detalle_alojamiento'),
+    path('reservas/crear/', CrearReservaView.as_view(),    name='crear_reserva'),
 ]

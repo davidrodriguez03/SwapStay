@@ -1,0 +1,277 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Nueva Reserva{% endblock %}
+
+{% block content %}
+<div class="container py-5" x-data="wizard()">
+
+    <!-- Header -->
+    <div class="row justify-content-center mb-5">
+        <div class="col-lg-8 text-center">
+            <span class="badge bg-primary-subtle text-primary px-3 py-2 rounded-pill mb-3">Paso a paso</span>
+            <h2 class="fw-bold">Crear nueva reserva</h2>
+            <p class="text-muted">Completa cada paso para confirmar tu alojamiento</p>
+        </div>
+    </div>
+
+    <!-- Stepper -->
+    <div class="row justify-content-center mb-5">
+        <div class="col-lg-8">
+            <div class="d-flex align-items-center justify-content-center">
+                <!-- Paso 1 -->
+                <div class="step-item text-center" :class="{ 'active': paso >= 1, 'completed': paso > 1 }">
+                    <div class="step-circle mx-auto mb-2"
+                         :class="paso > 1 ? 'bg-success text-white' : paso === 1 ? 'bg-primary text-white' : 'bg-light text-muted'">
+                        <span x-show="paso <= 1">1</span>
+                        <i class="fa-solid fa-check" x-show="paso > 1"></i>
+                    </div>
+                    <div class="small fw-semibold" :class="paso >= 1 ? 'text-primary' : 'text-muted'">Alojamiento</div>
+                </div>
+
+                <div class="step-line" :class="paso > 1 ? 'bg-success' : 'bg-light'"></div>
+
+                <!-- Paso 2 -->
+                <div class="step-item text-center" :class="{ 'active': paso >= 2, 'completed': paso > 2 }">
+                    <div class="step-circle mx-auto mb-2"
+                         :class="paso > 2 ? 'bg-success text-white' : paso === 2 ? 'bg-primary text-white' : 'bg-light text-muted'">
+                        <span x-show="paso <= 2">2</span>
+                        <i class="fa-solid fa-check" x-show="paso > 2"></i>
+                    </div>
+                    <div class="small fw-semibold" :class="paso >= 2 ? 'text-primary' : 'text-muted'">Fechas</div>
+                </div>
+
+                <div class="step-line" :class="paso > 2 ? 'bg-success' : 'bg-light'"></div>
+
+                <!-- Paso 3 -->
+                <div class="step-item text-center">
+                    <div class="step-circle mx-auto mb-2"
+                         :class="paso === 3 ? 'bg-primary text-white' : 'bg-light text-muted'">3</div>
+                    <div class="small fw-semibold" :class="paso === 3 ? 'text-primary' : 'text-muted'">Confirmación</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Formulario -->
+    <div class="row justify-content-center">
+        <div class="col-lg-7">
+            <form method="post" id="reserva-form">
+                {% csrf_token %}
+
+                <!-- ===== PASO 1: Elegir alojamiento ===== -->
+                <div x-show="paso === 1" x-transition>
+                    <div class="card border-0 shadow-sm rounded-4 p-4 mb-4">
+                        <h5 class="fw-bold mb-4">
+                            <i class="fa-solid fa-house text-primary me-2"></i>
+                            Selecciona el alojamiento
+                        </h5>
+
+                        <div class="mb-4">
+                            <label class="form-label fw-semibold">Estudiante</label>
+                            {{ form.estudiante }}
+                            {% if form.estudiante.errors %}
+                            <div class="invalid-feedback d-block">{{ form.estudiante.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-2">
+                            <label class="form-label fw-semibold">Alojamiento disponible</label>
+                            <div class="position-relative">
+                                {{ form.alojamiento }}
+                                <i class="fa-solid fa-house position-absolute top-50 start-0 translate-middle-y ms-3 text-muted"></i>
+                            </div>
+                            {% if form.alojamiento.errors %}
+                            <div class="invalid-feedback d-block">{{ form.alojamiento.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="bg-light rounded-3 p-3 mt-3">
+                            <p class="small text-muted mb-0">
+                                <i class="fa-solid fa-circle-info me-1 text-primary"></i>
+                                Solo se muestran alojamientos actualmente disponibles
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-end">
+                        <button type="button" class="btn btn-primary fw-semibold px-4"
+                                @click="irPaso(2)">
+                            Siguiente <i class="fa-solid fa-arrow-right ms-2"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- ===== PASO 2: Fechas ===== -->
+                <div x-show="paso === 2" x-transition>
+                    <div class="card border-0 shadow-sm rounded-4 p-4 mb-4">
+                        <h5 class="fw-bold mb-4">
+                            <i class="fa-solid fa-calendar text-primary me-2"></i>
+                            Selecciona las fechas de tu estadía
+                        </h5>
+
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Fecha de entrada</label>
+                                {{ form.fecha_inicio }}
+                                {% if form.fecha_inicio.errors %}
+                                <div class="invalid-feedback d-block">{{ form.fecha_inicio.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Fecha de salida</label>
+                                {{ form.fecha_fin }}
+                                {% if form.fecha_fin.errors %}
+                                <div class="invalid-feedback d-block">{{ form.fecha_fin.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Resumen de días -->
+                        <div class="bg-primary-subtle rounded-3 p-3" x-show="diasEstadia > 0">
+                            <div class="row text-center g-2">
+                                <div class="col-4">
+                                    <div class="fw-bold text-primary fs-4" x-text="diasEstadia"></div>
+                                    <div class="small text-muted">días</div>
+                                </div>
+                                <div class="col-4">
+                                    <div class="fw-bold text-primary fs-4" x-text="mesesEstadia"></div>
+                                    <div class="small text-muted">meses aprox.</div>
+                                </div>
+                                <div class="col-4">
+                                    <div class="fw-bold text-success fs-5" x-text="'$' + costoEstimado.toLocaleString('es-CO')"></div>
+                                    <div class="small text-muted">COP estimado</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between">
+                        <button type="button" class="btn btn-outline-secondary px-4" @click="irPaso(1)">
+                            <i class="fa-solid fa-arrow-left me-2"></i>Anterior
+                        </button>
+                        <button type="button" class="btn btn-primary fw-semibold px-4" @click="irPaso(3)">
+                            Siguiente <i class="fa-solid fa-arrow-right ms-2"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- ===== PASO 3: Confirmación ===== -->
+                <div x-show="paso === 3" x-transition>
+                    <div class="card border-0 shadow-sm rounded-4 p-4 mb-4">
+                        <h5 class="fw-bold mb-4">
+                            <i class="fa-solid fa-clipboard-check text-primary me-2"></i>
+                            Confirma tu reserva
+                        </h5>
+
+                        <div class="list-group list-group-flush rounded-3 border mb-4">
+                            <div class="list-group-item d-flex justify-content-between py-3">
+                                <span class="text-muted fw-semibold small text-uppercase">Alojamiento</span>
+                                <span class="fw-semibold text-end" id="resumen-alojamiento">—</span>
+                            </div>
+                            <div class="list-group-item d-flex justify-content-between py-3">
+                                <span class="text-muted fw-semibold small text-uppercase">Estudiante</span>
+                                <span class="fw-semibold text-end" id="resumen-estudiante">—</span>
+                            </div>
+                            <div class="list-group-item d-flex justify-content-between py-3">
+                                <span class="text-muted fw-semibold small text-uppercase">Entrada</span>
+                                <span class="fw-semibold" x-text="fechaInicioStr || '—'"></span>
+                            </div>
+                            <div class="list-group-item d-flex justify-content-between py-3">
+                                <span class="text-muted fw-semibold small text-uppercase">Salida</span>
+                                <span class="fw-semibold" x-text="fechaFinStr || '—'"></span>
+                            </div>
+                            <div class="list-group-item d-flex justify-content-between py-3">
+                                <span class="text-muted fw-semibold small text-uppercase">Duración</span>
+                                <span class="fw-semibold" x-text="diasEstadia + ' días'"></span>
+                            </div>
+                        </div>
+
+                        <div class="bg-success-subtle rounded-3 p-4 text-center mb-4">
+                            <div class="text-muted small mb-1">Costo total estimado</div>
+                            <div class="display-6 fw-bold text-success"
+                                 x-text="'$' + costoEstimado.toLocaleString('es-CO')">
+                            </div>
+                            <div class="text-muted small">COP (precio mensual prorrateado)</div>
+                        </div>
+
+                        <div class="alert alert-info border-0 rounded-3 small">
+                            <i class="fa-solid fa-circle-info me-2"></i>
+                            Al confirmar, el alojamiento quedará marcado como reservado y recibirás una notificación de confirmación.
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between">
+                        <button type="button" class="btn btn-outline-secondary px-4" @click="irPaso(2)">
+                            <i class="fa-solid fa-arrow-left me-2"></i>Anterior
+                        </button>
+                        <button type="submit" class="btn btn-success fw-semibold px-5">
+                            <i class="fa-solid fa-calendar-check me-2"></i>Confirmar reserva
+                        </button>
+                    </div>
+                </div>
+
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function wizard() {
+    const precioPorMes = 0; // se calcula según selección
+
+    return {
+        paso: 1,
+        diasEstadia: 0,
+        mesesEstadia: '0',
+        costoEstimado: 0,
+        fechaInicioStr: '',
+        fechaFinStr: '',
+
+        irPaso(n) {
+            if (n === 3) this.actualizarResumen();
+            this.paso = n;
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        },
+
+        init() {
+            const preselect = new URLSearchParams(window.location.search).get('alojamiento');
+            if (preselect) {
+                const sel = document.querySelector('[name="alojamiento"]');
+                if (sel) sel.value = preselect;
+            }
+
+            document.querySelector('[name="fecha_inicio"]')?.addEventListener('change', () => this.calcularDias());
+            document.querySelector('[name="fecha_fin"]')?.addEventListener('change', () => this.calcularDias());
+        },
+
+        calcularDias() {
+            const fi = document.querySelector('[name="fecha_inicio"]')?.value;
+            const ff = document.querySelector('[name="fecha_fin"]')?.value;
+            if (!fi || !ff) return;
+            const dias = Math.max(0, (new Date(ff) - new Date(fi)) / 86400000);
+            this.diasEstadia = Math.ceil(dias);
+            this.mesesEstadia = (dias / 30).toFixed(1);
+            this.fechaInicioStr = fi;
+            this.fechaFinStr = ff;
+            // Estimar costo desde el select
+            const sel = document.querySelector('[name="alojamiento"]');
+            const texto = sel?.selectedOptions[0]?.text || '';
+            const match = texto.match(/[\d.,]+/);
+            const precio = match ? parseFloat(match[0].replace(/[.,]/g, '')) : 1500000;
+            this.costoEstimado = Math.round(precio * dias / 30);
+        },
+
+        actualizarResumen() {
+            const selAloj = document.querySelector('[name="alojamiento"]');
+            const selEst = document.querySelector('[name="estudiante"]');
+            if (selAloj) document.getElementById('resumen-alojamiento').textContent = selAloj.selectedOptions[0]?.text || '—';
+            if (selEst) document.getElementById('resumen-estudiante').textContent = selEst.selectedOptions[0]?.text || '—';
+            this.calcularDias();
+        }
+    };
+}
+</script>
+{% endblock %}

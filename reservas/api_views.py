@@ -1,16 +1,27 @@
-from rest_framework.views import APIView
-from rest_framework.response import Response
+import logging
+from datetime import date
+
+from django.db.models import Sum
 from rest_framework import status
+from rest_framework.response import Response
+from rest_framework.views import APIView
 from django.core.exceptions import ValidationError
 
 from .serializers import (
-    CrearReservaSerializer, 
+    CrearReservaSerializer,
     ReservaSerializer,
     ReservaDetalleSerializer,
-    AlojamientoSerializer
+    AlojamientoSerializer,
 )
 from .services import ReservaService
 from .models import Estudiante, Alojamiento, Reserva
+from .domain.adapters.currency_adapter import (
+    get_currency_adapter,
+    OpenERAPIAdapter,
+    MockAdapter,
+)
+
+logger = logging.getLogger(__name__)
 
 ##API para crear una reserva
 class CrearReservaAPIView(APIView):
@@ -115,11 +126,55 @@ class ListarAlojamientosDisponiblesAPIView(APIView):
 
 
 
-# RESUMEN DE CÓDIGOS HTTP USADOS:
+class EstadisticasSistemaAPIView(APIView):
+    """GET /api/v1/sistema/estadisticas/ — métricas agregadas del sistema.
 
-# 200 OK: Consultas exitosas (GET)
-# 201 CREATED: Recurso creado exitosamente (POST)
-# 400 BAD REQUEST: Datos inválidos o error de validación
-# 404 NOT FOUND: Recurso no encontrado
-# 409 CONFLICT: Conflicto (ej: alojamiento no disponible) - puede usarse en lugar de 400
-# 500 INTERNAL SERVER ERROR: Error inesperado del servidor
+    Usa el Adapter Pattern para convertir ingresos COP→USD:
+    intenta MicroserviceMonedaAdapter, luego OpenERAPIAdapter, luego MockAdapter.
+    """
+
+    def get(self, request):
+        hoy = date.today()
+
+        # ── Métricas desde la BD ──────────────────────────────────────────────
+        reservas_activas = Reserva.objects.filter(estado='CONFIRMADA').count()
+        alojamientos_total = Alojamiento.objects.count()
+        alojamientos_disponibles = Alojamiento.objects.filter(disponible=True).count()
+        estudiantes_registrados = Estudiante.objects.count()
+
+        ocupacion_pct = round(
+            (alojamientos_total - alojamientos_disponibles) / alojamientos_total * 100
+            if alojamientos_total > 0 else 0.0,
+            1,
+        )
+
+        ingresos_mes_cop = float(
+            Reserva.objects.filter(
+                estado='CONFIRMADA',
+                fecha_inicio__year=hoy.year,
+                fecha_inicio__month=hoy.month,
+            ).aggregate(total=Sum('monto_total'))['total'] or 0
+        )
+
+        # ── Conversión COP→USD vía Adapter Pattern ────────────────────────────
+        ingresos_mes_usd = None
+        fuente_tasa = None
+        for adapter in (get_currency_adapter(), OpenERAPIAdapter(), MockAdapter()):
+            try:
+                resultado = adapter.cotizar(ingresos_mes_cop, 'COP', 'USD')
+                ingresos_mes_usd = resultado.get('resultado')
+                fuente_tasa = resultado.get('fuente', adapter.__class__.__name__)
+                break
+            except Exception as exc:
+                logger.warning('[EstadisticasSistema] %s falló: %s', adapter.__class__.__name__, exc)
+
+        return Response({
+            'reservas_activas': reservas_activas,
+            'alojamientos_disponibles': alojamientos_disponibles,
+            'alojamientos_total': alojamientos_total,
+            'estudiantes_registrados': estudiantes_registrados,
+            'ocupacion_pct': ocupacion_pct,
+            'ingresos_mes_cop': ingresos_mes_cop,
+            'ingresos_mes_usd': ingresos_mes_usd,
+            'fuente_tasa': fuente_tasa,
+        })

@@ -1,4 +1,6 @@
 services:
+
+  # ── Base de datos ────────────────────────────────────────────────────────────
   db:
     image: postgres:16-alpine
     container_name: swapstay_db
@@ -16,16 +18,70 @@ services:
       interval: 5s
       timeout: 3s
       retries: 5
+    networks:
+      - swapstay_network
 
+  # ── Redis (broker Celery) ────────────────────────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    container_name: swapstay_redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      - swapstay_network
+
+  # ── Django (frontend + API) ──────────────────────────────────────────────────
   django:
-    image: python:3.12-slim
+    build:
+      context: .
+      dockerfile: Dockerfile
     container_name: swapstay_django
     working_dir: /app
     restart: unless-stopped
     command: >
-      sh -c "pip install --no-cache-dir -r requirements-django.txt &&
-      python manage.py migrate &&
-      gunicorn config.wsgi:application --bind 0.0.0.0:8000"
+      sh -c "python manage.py migrate &&
+             python manage.py collectstatic --noinput &&
+             gunicorn config.wsgi:application --bind 0.0.0.0:8000 --workers 4"
+    volumes:
+      - ./:/app
+      - static_volume:/app/staticfiles
+    environment:
+      ENV_TYPE: development
+      DB_ENGINE: postgres
+      DB_NAME: swapstay
+      DB_USER: swapstay
+      DB_PASSWORD: swapstay
+      DB_HOST: db
+      DB_PORT: 5432
+      CELERY_BROKER_URL: redis://redis:6379/0
+      CELERY_RESULT_BACKEND: redis://redis:6379/0
+      NOTIFICACIONES_SERVICE_URL: http://flask-notificaciones:5002
+      MONEDA_SERVICE_URL: http://flask-moneda:5005
+      ALLOWED_HOSTS: localhost,127.0.0.1,django,nginx
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - swapstay_network
+
+  # ── Celery Worker ────────────────────────────────────────────────────────────
+  celery_worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: swapstay_celery_worker
+    restart: unless-stopped
+    command: celery -A config worker --loglevel=info --concurrency=2
     volumes:
       - ./:/app
     environment:
@@ -36,22 +92,143 @@ services:
       DB_PASSWORD: swapstay
       DB_HOST: db
       DB_PORT: 5432
-      ALLOWED_HOSTS: localhost,127.0.0.1,django,nginx
+      CELERY_BROKER_URL: redis://redis:6379/0
+      CELERY_RESULT_BACKEND: redis://redis:6379/0
+      NOTIFICACIONES_SERVICE_URL: http://flask-notificaciones:5002
+      MONEDA_SERVICE_URL: http://flask-moneda:5005
     depends_on:
       db:
         condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - swapstay_network
 
+  # ── Celery Beat (tareas programadas) ─────────────────────────────────────────
+  celery_beat:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: swapstay_celery_beat
+    restart: unless-stopped
+    command: celery -A config beat --loglevel=info --scheduler django_celery_beat.schedulers:DatabaseScheduler
+    volumes:
+      - ./:/app
+    environment:
+      ENV_TYPE: development
+      DB_ENGINE: postgres
+      DB_NAME: swapstay
+      DB_USER: swapstay
+      DB_PASSWORD: swapstay
+      DB_HOST: db
+      DB_PORT: 5432
+      CELERY_BROKER_URL: redis://redis:6379/0
+      CELERY_RESULT_BACKEND: redis://redis:6379/0
+      MONEDA_SERVICE_URL: http://flask-moneda:5005
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      celery_worker:
+        condition: service_started
+    networks:
+      - swapstay_network
+
+  # ── Flask: Microservicio 1 — Cotizaciones ────────────────────────────────────
   flask:
     build:
       context: ./flask_service
       dockerfile: Dockerfile
-    container_name: swapstay_flask
+    container_name: swapstay_flask_cotizaciones
     restart: unless-stopped
     environment:
       FLASK_ENV: production
     expose:
       - "5000"
+    networks:
+      - swapstay_network
 
+  # ── Flask: Microservicio 2 — Notificaciones ──────────────────────────────────
+  flask-notificaciones:
+    build:
+      context: ./flask_service_notificaciones
+      dockerfile: Dockerfile
+    container_name: swapstay_flask_notificaciones
+    restart: unless-stopped
+    environment:
+      FLASK_ENV: production
+      SENDGRID_API_KEY: ${SENDGRID_API_KEY:-}
+      SENDGRID_FROM_EMAIL: ${SENDGRID_FROM_EMAIL:-noreply@swapstay.com}
+    expose:
+      - "5002"
+    networks:
+      - swapstay_network
+
+  # ── Flask: Microservicio 3 — Disponibilidad ──────────────────────────────────
+  flask-disponibilidad:
+    build:
+      context: ./flask_service_disponibilidad
+      dockerfile: Dockerfile
+    container_name: swapstay_flask_disponibilidad
+    restart: unless-stopped
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_NAME: swapstay
+      DB_USER: swapstay
+      DB_PASSWORD: swapstay
+    expose:
+      - "5003"
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - swapstay_network
+
+  # ── Flask: Microservicio 4 — Validaciones ────────────────────────────────────
+  flask-validaciones:
+    build:
+      context: ./flask_service_validaciones
+      dockerfile: Dockerfile
+    container_name: swapstay_flask_validaciones
+    restart: unless-stopped
+    environment:
+      FLASK_ENV: production
+    expose:
+      - "5004"
+    networks:
+      - swapstay_network
+
+  # ── Flask: Microservicio 5 — Moneda ──────────────────────────────────────────
+  flask-moneda:
+    build:
+      context: ./flask_service_moneda
+      dockerfile: Dockerfile
+    container_name: swapstay_flask_moneda
+    restart: unless-stopped
+    environment:
+      FLASK_ENV: production
+    expose:
+      - "5005"
+    networks:
+      - swapstay_network
+
+  # ── Flask: Microservicio 6 — Geolocalización ─────────────────────────────────
+  flask-geolocalizacion:
+    build:
+      context: ./flask_service_geolocalizacion
+      dockerfile: Dockerfile
+    container_name: swapstay_flask_geolocalizacion
+    restart: unless-stopped
+    environment:
+      FLASK_ENV: production
+    expose:
+      - "5006"
+    networks:
+      - swapstay_network
+
+  # ── Nginx (API Gateway) ──────────────────────────────────────────────────────
   nginx:
     image: nginx:1.27-alpine
     container_name: swapstay_nginx
@@ -60,9 +237,23 @@ services:
       - "80:80"
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - static_volume:/app/staticfiles:ro
     depends_on:
       - django
       - flask
+      - flask-notificaciones
+      - flask-disponibilidad
+      - flask-validaciones
+      - flask-moneda
+      - flask-geolocalizacion
+    networks:
+      - swapstay_network
 
 volumes:
   postgres_data:
+  redis_data:
+  static_volume:
+
+networks:
+  swapstay_network:
+    driver: bridge

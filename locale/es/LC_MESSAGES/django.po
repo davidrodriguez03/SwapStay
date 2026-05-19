@@ -1,0 +1,178 @@
+# SwapStay — Traducción Español
+# Copyright (C) 2026 SwapStay
+msgid ""
+msgstr ""
+"Project-Id-Version: SwapStay 2.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-05-19 00:00+0000\n"
+"PO-Revision-Date: 2026-05-19 00:00+0000\n"
+"Last-Translator: SwapStay Team\n"
+"Language: es\n"
+"Language-Team: Spanish\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+# ── Navegación ────────────────────────────────────────────────────────────────
+msgid "Home"
+msgstr "Inicio"
+
+msgid "Explore"
+msgstr "Explorar"
+
+msgid "Dashboard"
+msgstr "Panel"
+
+msgid "Login"
+msgstr "Iniciar sesión"
+
+msgid "Register"
+msgstr "Registrarse"
+
+msgid "Logout"
+msgstr "Cerrar sesión"
+
+# ── Landing ───────────────────────────────────────────────────────────────────
+msgid "Find your home abroad"
+msgstr "Encuentra tu hogar en el exterior"
+
+msgid "Student housing for international students in Colombia"
+msgstr "Alojamiento estudiantil para estudiantes internacionales en Colombia"
+
+msgid "Search"
+msgstr "Buscar"
+
+msgid "City"
+msgstr "Ciudad"
+
+msgid "Type"
+msgstr "Tipo"
+
+msgid "Max price"
+msgstr "Precio máximo"
+
+msgid "How it works"
+msgstr "Cómo funciona"
+
+msgid "Featured listings"
+msgstr "Alojamientos destacados"
+
+# ── Alojamientos ──────────────────────────────────────────────────────────────
+msgid "Available"
+msgstr "Disponible"
+
+msgid "Not available"
+msgstr "No disponible"
+
+msgid "House"
+msgstr "Casa"
+
+msgid "Apartment"
+msgstr "Apartamento"
+
+msgid "Monthly price"
+msgstr "Precio mensual"
+
+msgid "per month"
+msgstr "por mes"
+
+msgid "Book now"
+msgstr "Reservar ahora"
+
+msgid "View details"
+msgstr "Ver detalles"
+
+# ── Reservas ──────────────────────────────────────────────────────────────────
+msgid "Create reservation"
+msgstr "Crear reserva"
+
+msgid "Start date"
+msgstr "Fecha de inicio"
+
+msgid "End date"
+msgstr "Fecha de fin"
+
+msgid "Total amount"
+msgstr "Monto total"
+
+msgid "Confirm"
+msgstr "Confirmar"
+
+msgid "Cancel"
+msgstr "Cancelar"
+
+msgid "Confirmed"
+msgstr "Confirmada"
+
+msgid "Pending"
+msgstr "Pendiente"
+
+msgid "Cancelled"
+msgstr "Cancelada"
+
+# ── Dashboard ─────────────────────────────────────────────────────────────────
+msgid "My reservations"
+msgstr "Mis reservas"
+
+msgid "Total reservations"
+msgstr "Total de reservas"
+
+msgid "Currency converter"
+msgstr "Conversor de moneda"
+
+# ── Autenticación ─────────────────────────────────────────────────────────────
+msgid "Username"
+msgstr "Usuario"
+
+msgid "Password"
+msgstr "Contraseña"
+
+msgid "Email"
+msgstr "Correo electrónico"
+
+msgid "First name"
+msgstr "Nombre"
+
+msgid "Last name"
+msgstr "Apellido"
+
+msgid "Sign in"
+msgstr "Iniciar sesión"
+
+msgid "Create account"
+msgstr "Crear cuenta"
+
+msgid "Already have an account?"
+msgstr "¿Ya tienes una cuenta?"
+
+msgid "Don't have an account?"
+msgstr "¿No tienes cuenta?"
+
+# ── General ───────────────────────────────────────────────────────────────────
+msgid "Loading..."
+msgstr "Cargando..."
+
+msgid "Error"
+msgstr "Error"
+
+msgid "Success"
+msgstr "Éxito"
+
+msgid "Save"
+msgstr "Guardar"
+
+msgid "Back"
+msgstr "Volver"
+
+msgid "Next"
+msgstr "Siguiente"
+
+msgid "days"
+msgstr "días"
+
+msgid "months"
+msgstr "meses"
+
+msgid "Language"
+msgstr "Idioma"

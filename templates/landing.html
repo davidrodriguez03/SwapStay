@@ -1,0 +1,216 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Inicio{% endblock %}
+
+{% block content %}
+
+<!-- ===== HERO ===== -->
+<section class="hero-section position-relative overflow-hidden">
+    <div class="hero-bg"></div>
+    <div class="container position-relative py-5">
+        <div class="row align-items-center min-vh-75 py-5">
+            <div class="col-lg-6 text-white">
+                <span class="badge bg-white text-primary fw-semibold px-3 py-2 mb-3 rounded-pill">
+                    <i class="fa-solid fa-star me-1"></i> Plataforma para estudiantes
+                </span>
+                <h1 class="display-4 fw-bold lh-sm mb-4">
+                    Tu hogar lejos<br>de casa, con<br>
+                    <span class="text-warning">total confianza</span>
+                </h1>
+                <p class="fs-5 text-white-75 mb-4">
+                    Encuentra alojamiento temporal verificado para tu intercambio universitario.
+                    Casas y apartamentos con arrendadores de confianza en toda Colombia.
+                </p>
+                <div class="d-flex gap-3 flex-wrap">
+                    <a href="{% url 'catalogo' %}" class="btn btn-warning btn-lg fw-semibold px-4 shadow">
+                        <i class="fa-solid fa-magnifying-glass me-2"></i>Explorar alojamientos
+                    </a>
+                    <a href="#como-funciona" class="btn btn-outline-light btn-lg px-4">
+                        Cómo funciona
+                    </a>
+                </div>
+
+                <!-- Stats -->
+                <div class="row g-3 mt-4">
+                    <div class="col-4">
+                        <div class="text-center">
+                            <div class="display-6 fw-bold text-warning">{{ total_alojamientos }}+</div>
+                            <div class="small text-white-75">Alojamientos</div>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="text-center">
+                            <div class="display-6 fw-bold text-warning">{{ total_estudiantes }}+</div>
+                            <div class="small text-white-75">Estudiantes</div>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="text-center">
+                            <div class="display-6 fw-bold text-warning">{{ total_ciudades }}+</div>
+                            <div class="small text-white-75">Ciudades</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Hero search card -->
+            <div class="col-lg-5 offset-lg-1 mt-5 mt-lg-0">
+                <div class="card shadow-lg border-0 rounded-4 p-4">
+                    <h5 class="fw-bold mb-4 text-center text-dark">
+                        <i class="fa-solid fa-magnifying-glass text-primary me-2"></i>
+                        Busca tu alojamiento
+                    </h5>
+                    <form action="{% url 'catalogo' %}" method="get">
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold small text-muted text-uppercase tracking-wide">Ciudad</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-end-0">
+                                    <i class="fa-solid fa-location-dot text-primary"></i>
+                                </span>
+                                <input type="text" name="ciudad" class="form-control border-start-0 ps-0"
+                                       placeholder="Ej: Bogotá, Medellín, Cali...">
+                            </div>
+                        </div>
+                        <div class="row g-2 mb-3">
+                            <div class="col-6">
+                                <label class="form-label fw-semibold small text-muted text-uppercase">Tipo</label>
+                                <select name="tipo" class="form-select">
+                                    <option value="">Cualquiera</option>
+                                    <option value="casa">Casa</option>
+                                    <option value="apartamento">Apartamento</option>
+                                </select>
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label fw-semibold small text-muted text-uppercase">Precio máx.</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light">$</span>
+                                    <input type="number" name="precio_max" class="form-control"
+                                           placeholder="COP" step="100000">
+                                </div>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100 btn-lg fw-semibold">
+                            <i class="fa-solid fa-search me-2"></i>Buscar ahora
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ===== CÓMO FUNCIONA ===== -->
+<section id="como-funciona" class="py-6 bg-light">
+    <div class="container">
+        <div class="text-center mb-5">
+            <span class="badge bg-primary-subtle text-primary px-3 py-2 rounded-pill mb-3">Proceso simple</span>
+            <h2 class="fw-bold display-6">¿Cómo funciona SwapStay?</h2>
+            <p class="text-muted lead">Tres pasos para encontrar tu alojamiento ideal</p>
+        </div>
+        <div class="row g-4 justify-content-center">
+            <div class="col-md-4">
+                <div class="card border-0 shadow-sm h-100 text-center p-4 step-card">
+                    <div class="step-number bg-primary text-white rounded-circle mx-auto mb-4">1</div>
+                    <div class="icon-circle bg-primary-subtle mx-auto mb-3">
+                        <i class="fa-solid fa-magnifying-glass text-primary fs-4"></i>
+                    </div>
+                    <h5 class="fw-bold">Explora</h5>
+                    <p class="text-muted small">Busca entre nuestra lista de alojamientos verificados. Filtra por ciudad, precio y tipo.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card border-0 shadow-sm h-100 text-center p-4 step-card">
+                    <div class="step-number bg-success text-white rounded-circle mx-auto mb-4">2</div>
+                    <div class="icon-circle bg-success-subtle mx-auto mb-3">
+                        <i class="fa-solid fa-calendar-check text-success fs-4"></i>
+                    </div>
+                    <h5 class="fw-bold">Reserva</h5>
+                    <p class="text-muted small">Selecciona las fechas de tu intercambio y crea tu reserva en minutos.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card border-0 shadow-sm h-100 text-center p-4 step-card">
+                    <div class="step-number bg-warning text-white rounded-circle mx-auto mb-4">3</div>
+                    <div class="icon-circle bg-warning-subtle mx-auto mb-3">
+                        <i class="fa-solid fa-house-circle-check text-warning fs-4"></i>
+                    </div>
+                    <h5 class="fw-bold">Disfruta</h5>
+                    <p class="text-muted small">Recibe confirmación inmediata y prepárate para tu nuevo hogar temporal.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ===== ALOJAMIENTOS DESTACADOS ===== -->
+{% if alojamientos_destacados %}
+<section class="py-6">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center mb-5">
+            <div>
+                <span class="badge bg-warning-subtle text-warning px-3 py-2 rounded-pill mb-2">Disponibles ahora</span>
+                <h2 class="fw-bold display-6 mb-0">Alojamientos destacados</h2>
+            </div>
+            <a href="{% url 'catalogo' %}" class="btn btn-outline-primary fw-semibold">
+                Ver todos <i class="fa-solid fa-arrow-right ms-1"></i>
+            </a>
+        </div>
+        <div class="row g-4">
+            {% for alojamiento in alojamientos_destacados %}
+            <div class="col-md-6 col-lg-4">
+                <div class="card border-0 shadow-sm h-100 alojamiento-card rounded-4 overflow-hidden">
+                    <div class="alojamiento-img-placeholder d-flex align-items-center justify-content-center">
+                        <i class="fa-solid fa-{% if alojamiento.tipo == 'Casa' %}house{% else %}building{% endif %} fa-3x text-white opacity-50"></i>
+                        <span class="badge bg-{{ alojamiento.tipo|lower|default:'secondary' }}-badge position-absolute top-0 end-0 m-3">
+                            {{ alojamiento.tipo|default:"Alojamiento" }}
+                        </span>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <h6 class="fw-bold mb-0">{{ alojamiento.nombre }}</h6>
+                            <span class="badge bg-success-subtle text-success">Disponible</span>
+                        </div>
+                        <p class="text-muted small mb-3">
+                            <i class="fa-solid fa-location-dot me-1 text-primary"></i>
+                            {{ alojamiento.ciudad }}
+                        </p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <span class="fs-5 fw-bold text-primary">
+                                    ${{ alojamiento.precio_mensual|floatformat:0 }}
+                                </span>
+                                <span class="text-muted small"> COP/mes</span>
+                            </div>
+                            <a href="{% url 'detalle_alojamiento' alojamiento.pk %}" class="btn btn-primary btn-sm px-3">
+                                Ver más
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- ===== CTA FINAL ===== -->
+<section class="py-6 bg-primary text-white">
+    <div class="container text-center py-4">
+        <h2 class="display-6 fw-bold mb-3">¿Listo para tu intercambio?</h2>
+        <p class="lead text-white-75 mb-4">Únete a estudiantes que ya encontraron su hogar con SwapStay</p>
+        <div class="d-flex gap-3 justify-content-center flex-wrap">
+            {% if not request.user.is_authenticated %}
+            <a href="{% url 'register' %}" class="btn btn-warning btn-lg fw-semibold px-5 shadow">
+                <i class="fa-solid fa-user-plus me-2"></i>Crear cuenta gratis
+            </a>
+            {% endif %}
+            <a href="{% url 'catalogo' %}" class="btn btn-outline-light btn-lg px-5">
+                <i class="fa-solid fa-magnifying-glass me-2"></i>Ver alojamientos
+            </a>
+        </div>
+    </div>
+</section>
+
+{% endblock %}

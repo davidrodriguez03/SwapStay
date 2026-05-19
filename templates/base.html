@@ -1,0 +1,204 @@
+{% load static i18n %}
+<!DOCTYPE html>
+<html lang="{{ LANGUAGE_CODE }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}SwapStay{% endblock %} | Alojamiento para Estudiantes</title>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Bootstrap 5.3 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome 6 -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link href="{% static 'css/custom.css' %}" rel="stylesheet">
+
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+
+<!-- ===== NAVBAR ===== -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm sticky-top">
+    <div class="container">
+        <a class="navbar-brand d-flex align-items-center gap-2 fw-bold" href="{% url 'landing' %}">
+            <i class="fa-solid fa-house-chimney-window fs-4"></i>
+            SwapStay
+        </a>
+
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMain">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navMain">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <li class="nav-item">
+                    <a class="nav-link {% block nav_catalogo %}{% endblock %}" href="{% url 'catalogo' %}">
+                        <i class="fa-solid fa-magnifying-glass me-1"></i>Explorar
+                    </a>
+                </li>
+                {% if request.user.is_authenticated %}
+                <li class="nav-item">
+                    <a class="nav-link {% block nav_dashboard %}{% endblock %}" href="{% url 'dashboard' %}">
+                        <i class="fa-solid fa-gauge me-1"></i>Mi Panel
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'crear_reserva' %}">
+                        <i class="fa-solid fa-calendar-plus me-1"></i>Reservar
+                    </a>
+                </li>
+                {% endif %}
+            </ul>
+
+            <ul class="navbar-nav align-items-center gap-2">
+                {% if request.user.is_authenticated %}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle d-flex align-items-center gap-2" href="#" data-bs-toggle="dropdown">
+                            <span class="avatar-circle bg-white text-primary">
+                                {{ request.user.first_name|first|default:request.user.username|first|upper }}
+                            </span>
+                            {{ request.user.get_full_name|default:request.user.username }}
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end shadow border-0">
+                            <li><a class="dropdown-item" href="{% url 'dashboard' %}"><i class="fa-solid fa-gauge me-2 text-primary"></i>Mi Panel</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <form method="post" action="{% url 'logout' %}" class="d-inline">
+                                    {% csrf_token %}
+                                    <button type="submit" class="dropdown-item text-danger">
+                                        <i class="fa-solid fa-right-from-bracket me-2"></i>Cerrar sesión
+                                    </button>
+                                </form>
+                            </li>
+                        </ul>
+                    </li>
+                {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'login' %}">{% trans "Login" %}</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="btn btn-light btn-sm text-primary fw-semibold px-3" href="{% url 'register' %}">
+                            {% trans "Register" %}
+                        </a>
+                    </li>
+                {% endif %}
+
+                <!-- ── Selector de idioma ── -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle d-flex align-items-center gap-1 px-2"
+                       href="#" data-bs-toggle="dropdown" title="{% trans 'Language' %}">
+                        <i class="fa-solid fa-globe"></i>
+                        <span class="d-none d-lg-inline">
+                            {% get_current_language as CURRENT_LANG %}
+                            {{ CURRENT_LANG|upper }}
+                        </span>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end shadow border-0">
+                        {% get_available_languages as LANGUAGES_LIST %}
+                        {% for lang_code, lang_name in LANGUAGES_LIST %}
+                        <li>
+                            <form method="post" action="{% url 'set_language' %}">
+                                {% csrf_token %}
+                                <input type="hidden" name="language" value="{{ lang_code }}">
+                                <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                                <button type="submit"
+                                    class="dropdown-item {% if lang_code == CURRENT_LANG %}fw-bold text-primary{% endif %}">
+                                    {% if lang_code == 'es' %}🇨🇴{% else %}🇺🇸{% endif %}
+                                    {{ lang_name }}
+                                </button>
+                            </form>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- ===== MENSAJES ===== -->
+{% if messages %}
+<div class="container mt-3">
+    {% for message in messages %}
+    <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} alert-dismissible fade show" role="alert">
+        <i class="fa-solid fa-{% if message.tags == 'success' %}circle-check{% elif message.tags == 'error' %}circle-xmark{% else %}circle-info{% endif %} me-2"></i>
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<!-- ===== CONTENIDO ===== -->
+<main>
+    {% block content %}{% endblock %}
+</main>
+
+<!-- ===== FOOTER ===== -->
+<footer class="footer bg-dark text-light mt-5 py-5">
+    <div class="container">
+        <div class="row g-4">
+            <div class="col-lg-4">
+                <div class="d-flex align-items-center gap-2 mb-3">
+                    <i class="fa-solid fa-house-chimney-window fs-4 text-primary"></i>
+                    <span class="fs-5 fw-bold">SwapStay</span>
+                </div>
+                <p class="text-secondary small">
+                    Plataforma de alojamiento temporal para estudiantes universitarios en intercambio.
+                    Conectamos estudiantes con arrendadores de confianza.
+                </p>
+            </div>
+            <div class="col-lg-2 col-6">
+                <h6 class="fw-semibold mb-3">Plataforma</h6>
+                <ul class="list-unstyled small text-secondary">
+                    <li class="mb-2"><a href="{% url 'catalogo' %}" class="text-secondary text-decoration-none footer-link">Explorar alojamientos</a></li>
+                    <li class="mb-2"><a href="{% url 'landing' %}#como-funciona" class="text-secondary text-decoration-none footer-link">Cómo funciona</a></li>
+                </ul>
+            </div>
+            <div class="col-lg-2 col-6">
+                <h6 class="fw-semibold mb-3">Cuenta</h6>
+                <ul class="list-unstyled small text-secondary">
+                    {% if request.user.is_authenticated %}
+                    <li class="mb-2"><a href="{% url 'dashboard' %}" class="text-secondary text-decoration-none footer-link">Mi panel</a></li>
+                    {% else %}
+                    <li class="mb-2"><a href="{% url 'login' %}" class="text-secondary text-decoration-none footer-link">Iniciar sesión</a></li>
+                    <li class="mb-2"><a href="{% url 'register' %}" class="text-secondary text-decoration-none footer-link">Registrarse</a></li>
+                    {% endif %}
+                </ul>
+            </div>
+            <div class="col-lg-4">
+                <h6 class="fw-semibold mb-3">Tecnología</h6>
+                <div class="d-flex flex-wrap gap-2">
+                    <span class="badge bg-secondary">Django 5</span>
+                    <span class="badge bg-secondary">DRF</span>
+                    <span class="badge bg-secondary">Flask</span>
+                    <span class="badge bg-secondary">PostgreSQL</span>
+                    <span class="badge bg-secondary">Docker</span>
+                    <span class="badge bg-secondary">Bootstrap 5</span>
+                </div>
+            </div>
+        </div>
+        <hr class="border-secondary mt-4">
+        <div class="row align-items-center">
+            <div class="col-md-6 small text-secondary">
+                &copy; 2025 SwapStay. Proyecto Arquitectura de Software.
+            </div>
+            <div class="col-md-6 text-md-end small text-secondary">
+                Microservicios &middot; Patrones de Diseño &middot; AWS
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<!-- Alpine.js -->
+<script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+<!-- Custom JS -->
+<script src="{% static 'js/main.js' %}"></script>
+
+{% block extra_js %}{% endblock %}
+</body>
+</html>

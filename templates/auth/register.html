@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block title %}Crear Cuenta{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5">
+            <div class="text-center mb-4">
+                <i class="fa-solid fa-user-plus text-primary" style="font-size: 2.5rem;"></i>
+                <h3 class="fw-bold mt-3">Crea tu cuenta</h3>
+                <p class="text-muted">Únete a SwapStay y encuentra tu alojamiento ideal</p>
+            </div>
+
+            <div class="card border-0 shadow-sm rounded-4 p-4">
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="row g-3 mb-3">
+                        <div class="col-6">
+                            <label class="form-label fw-semibold small">Nombre</label>
+                            <input type="text" name="first_name" class="form-control" placeholder="Juan" required>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label fw-semibold small">Apellido</label>
+                            <input type="text" name="last_name" class="form-control" placeholder="Pérez">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small">Nombre de usuario</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light"><i class="fa-solid fa-at text-muted"></i></span>
+                            <input type="text" name="username" class="form-control" placeholder="mi_usuario" required>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small">Correo electrónico</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light"><i class="fa-solid fa-envelope text-muted"></i></span>
+                            <input type="email" name="email" class="form-control" placeholder="correo@universidad.edu.co">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small">Contraseña</label>
+                        <input type="password" name="password1" class="form-control" placeholder="Mínimo 8 caracteres" required>
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold small">Confirmar contraseña</label>
+                        <input type="password" name="password2" class="form-control" placeholder="Repite tu contraseña" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100 fw-semibold">
+                        <i class="fa-solid fa-user-plus me-2"></i>Crear cuenta
+                    </button>
+                </form>
+            </div>
+
+            <p class="text-center text-muted mt-3 small">
+                ¿Ya tienes cuenta?
+                <a href="{% url 'login' %}" class="text-primary fw-semibold text-decoration-none">Inicia sesión</a>
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}
