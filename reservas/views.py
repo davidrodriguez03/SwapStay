@@ -5,7 +5,8 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.models import User
 from django.contrib import messages
-from django.shortcuts import redirect, get_object_or_404
+from django.shortcuts import redirect, get_object_or_404, render
+from django.http import JsonResponse
 from django.urls import reverse_lazy
 from django.db.models import Sum, Q
 
@@ -171,7 +172,7 @@ class DashboardView(LoginRequiredMixin, TemplateView):
 
         if hasattr(user, 'arrendador'):
             arrendador = user.arrendador
-            alojamientos = Alojamiento.objects.filter(arrendador=arrendador)
+            alojamientos = Alojamiento.objects.filter(arrendador=arrendador).prefetch_related('imagenes')
             reservas_recibidas = Reserva.objects.filter(
                 alojamiento__arrendador=arrendador
             ).select_related('estudiante__user', 'alojamiento').order_by('-fecha_creacion')
@@ -216,7 +217,7 @@ class CatalogoView(TemplateView):
 
     def get_context_data(self, **kwargs):
         ctx  = super().get_context_data(**kwargs)
-        qs   = Alojamiento.objects.select_related('arrendador__user')
+        qs   = Alojamiento.objects.select_related('arrendador__user').prefetch_related('imagenes')
         req  = self.request.GET
 
         if req.get('ciudad'):
@@ -492,6 +493,103 @@ class PublicarAlojamientoView(LoginRequiredMixin, TemplateView):
 
         messages.success(request, f'Alojamiento "{alojamiento.nombre}" publicado exitosamente.')
         return redirect('dashboard')
+
+
+# ── Editar alojamiento ────────────────────────────────────────────────────────
+
+@arrendador_required
+def editar_alojamiento(request, pk):
+    alojamiento = get_object_or_404(Alojamiento, pk=pk)
+
+    if alojamiento.arrendador != request.user.arrendador:
+        messages.error(request, 'No tienes permiso para editar este alojamiento.')
+        return redirect('dashboard')
+
+    if request.method == 'POST':
+        alojamiento.nombre = request.POST.get('nombre', alojamiento.nombre).strip()
+        alojamiento.direccion = request.POST.get('direccion', alojamiento.direccion).strip()
+        alojamiento.ciudad = request.POST.get('ciudad', alojamiento.ciudad).strip()
+        precio = request.POST.get('precio_mensual', '').strip()
+        if precio:
+            alojamiento.precio_mensual = precio
+        alojamiento.descripcion_completa = request.POST.get('descripcion_completa', '').strip()
+        alojamiento.latitud = request.POST.get('latitud') or None
+        alojamiento.longitud = request.POST.get('longitud') or None
+        alojamiento.disponible = request.POST.get('disponible') == 'on'
+        alojamiento.save()
+
+        nuevas = request.FILES.getlist('imagenes')
+        count = alojamiento.imagenes.count()
+        for i, img_file in enumerate(nuevas):
+            AlojamientoImagen.objects.create(
+                alojamiento=alojamiento,
+                imagen=img_file,
+                orden=count + i,
+                es_principal=(count == 0 and i == 0),
+            )
+
+        messages.success(request, f'Alojamiento "{alojamiento.nombre}" actualizado correctamente.')
+        return redirect('dashboard')
+
+    return render(request, 'alojamientos/editar.html', {
+        'alojamiento': alojamiento,
+        'imagenes': alojamiento.imagenes.all(),
+    })
+
+
+# ── Eliminar alojamiento ──────────────────────────────────────────────────────
+
+@arrendador_required
+def eliminar_alojamiento(request, pk):
+    alojamiento = get_object_or_404(Alojamiento, pk=pk)
+
+    if alojamiento.arrendador != request.user.arrendador:
+        messages.error(request, 'No tienes permiso para eliminar este alojamiento.')
+        return redirect('dashboard')
+
+    reservas_activas = alojamiento.reserva_set.filter(
+        estado__in=['CONFIRMADA', 'PENDIENTE']
+    ).count()
+    if reservas_activas > 0:
+        messages.error(
+            request,
+            f'No puedes eliminar este alojamiento: tiene {reservas_activas} reserva(s) activa(s).'
+        )
+        return redirect('dashboard')
+
+    if request.method == 'POST':
+        nombre = alojamiento.nombre
+        alojamiento.delete()
+        messages.success(request, f'Alojamiento "{nombre}" eliminado correctamente.')
+        return redirect('dashboard')
+
+    return render(request, 'alojamientos/confirmar_eliminar.html', {'alojamiento': alojamiento})
+
+
+# ── Eliminar imagen individual ────────────────────────────────────────────────
+
+def eliminar_imagen_alojamiento(request, pk):
+    if not request.user.is_authenticated:
+        return JsonResponse({'error': 'No autenticado'}, status=401)
+    if request.method != 'POST':
+        return JsonResponse({'error': 'Método no permitido'}, status=405)
+
+    imagen = get_object_or_404(AlojamientoImagen, pk=pk)
+    alojamiento = imagen.alojamiento
+
+    if not hasattr(request.user, 'arrendador') or alojamiento.arrendador != request.user.arrendador:
+        return JsonResponse({'error': 'No autorizado'}, status=403)
+
+    era_principal = imagen.es_principal
+    imagen.delete()
+
+    if era_principal:
+        primera = alojamiento.imagenes.first()
+        if primera:
+            primera.es_principal = True
+            primera.save(update_fields=['es_principal'])
+
+    return JsonResponse({'success': True})
 
 
 # ── Helpers ───────────────────────────────────────────────────────────────────

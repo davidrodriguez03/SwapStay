@@ -1,0 +1,170 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Editar alojamiento" %}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="text-center mb-4">
+                <i class="fa-solid fa-pen-to-square text-primary" style="font-size: 2.5rem;"></i>
+                <h3 class="fw-bold mt-3">{% trans "Editar alojamiento" %}</h3>
+                <p class="text-muted">{{ alojamiento.nombre }}</p>
+            </div>
+
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+
+                <!-- Información básica -->
+                <div class="card border-0 shadow-sm rounded-4 p-4 mb-4">
+                    <h6 class="fw-bold mb-3">{% trans "Información básica" %}</h6>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small">{% trans "Nombre del alojamiento" %} *</label>
+                        <input type="text" name="nombre" class="form-control" required
+                               value="{{ alojamiento.nombre }}">
+                    </div>
+                    <div class="row g-3 mb-3">
+                        <div class="col-8">
+                            <label class="form-label fw-semibold small">{% trans "Dirección" %} *</label>
+                            <input type="text" name="direccion" class="form-control" required
+                                   value="{{ alojamiento.direccion }}">
+                        </div>
+                        <div class="col-4">
+                            <label class="form-label fw-semibold small">{% trans "Ciudad" %} *</label>
+                            <input type="text" name="ciudad" class="form-control" required
+                                   value="{{ alojamiento.ciudad }}">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small">{% trans "Precio mensual (COP)" %} *</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light">$</span>
+                            <input type="number" name="precio_mensual" class="form-control"
+                                   min="0" step="50000" required
+                                   value="{{ alojamiento.precio_mensual|floatformat:0 }}">
+                            <span class="input-group-text bg-light text-muted">COP</span>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small">{% trans "Descripción completa" %}</label>
+                        <textarea name="descripcion_completa" class="form-control" rows="5">{{ alojamiento.descripcion_completa }}</textarea>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="disponible" id="disponible"
+                               {% if alojamiento.disponible %}checked{% endif %}>
+                        <label class="form-check-label fw-semibold small" for="disponible">
+                            {% trans "Disponible para reservas" %}
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Coordenadas -->
+                <div class="card border-0 shadow-sm rounded-4 p-4 mb-4">
+                    <h6 class="fw-bold mb-1">
+                        <i class="fa-solid fa-location-dot me-2 text-primary"></i>{% trans "Coordenadas (opcional)" %}
+                    </h6>
+                    <p class="text-muted small mb-3">{% trans "Modifica para actualizar el mapa interactivo." %}</p>
+                    <div class="row g-3">
+                        <div class="col-6">
+                            <label class="form-label fw-semibold small">{% trans "Latitud" %}</label>
+                            <input type="number" name="latitud" class="form-control" step="0.000001"
+                                   placeholder="6.244203" value="{{ alojamiento.latitud|default:'' }}">
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label fw-semibold small">{% trans "Longitud" %}</label>
+                            <input type="number" name="longitud" class="form-control" step="0.000001"
+                                   placeholder="-75.581211" value="{{ alojamiento.longitud|default:'' }}">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Imágenes actuales -->
+                {% if imagenes %}
+                <div class="card border-0 shadow-sm rounded-4 p-4 mb-4">
+                    <h6 class="fw-bold mb-3">
+                        <i class="fa-solid fa-images me-2 text-primary"></i>{% trans "Imágenes actuales" %}
+                    </h6>
+                    <div class="row g-2" id="galeria-imagenes">
+                        {% for img in imagenes %}
+                        <div class="col-4 col-md-3" id="img-{{ img.pk }}">
+                            <div class="position-relative">
+                                <img src="{{ img.imagen.url }}"
+                                     class="img-fluid rounded-3"
+                                     style="height:100px;width:100%;object-fit:cover">
+                                {% if img.es_principal %}
+                                <span class="position-absolute top-0 start-0 badge bg-primary m-1"
+                                      style="font-size:0.6rem">{% trans "Principal" %}</span>
+                                {% endif %}
+                                <button type="button"
+                                        class="position-absolute top-0 end-0 btn btn-danger btn-sm m-1 py-0 px-1"
+                                        style="font-size:0.7rem"
+                                        onclick="eliminarImagen({{ img.pk }})">
+                                    <i class="fa-solid fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Agregar imágenes -->
+                <div class="card border-0 shadow-sm rounded-4 p-4 mb-4">
+                    <h6 class="fw-bold mb-1">
+                        <i class="fa-solid fa-cloud-arrow-up me-2 text-primary"></i>{% trans "Agregar imágenes" %}
+                    </h6>
+                    <p class="text-muted small mb-3">{% trans "Las nuevas fotos se agregarán a las existentes." %}</p>
+                    <input type="file" name="imagenes" class="form-control" multiple accept="image/*"
+                           id="imagenes-input">
+                    <div id="preview-nuevas" class="row g-2 mt-2"></div>
+                </div>
+
+                <div class="d-grid gap-2">
+                    <button type="submit" class="btn btn-primary btn-lg fw-semibold">
+                        <i class="fa-solid fa-floppy-disk me-2"></i>{% trans "Guardar cambios" %}
+                    </button>
+                    <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary">
+                        <i class="fa-solid fa-arrow-left me-2"></i>{% trans "Cancelar" %}
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function eliminarImagen(imagenId) {
+    if (!confirm('{% trans "¿Eliminar esta imagen?" %}')) return;
+    fetch(`/alojamientos/imagenes/${imagenId}/eliminar/`, {
+        method: 'POST',
+        headers: { 'X-CSRFToken': '{{ csrf_token }}' }
+    })
+    .then(r => r.json())
+    .then(d => {
+        if (d.success) {
+            const el = document.getElementById('img-' + imagenId);
+            if (el) el.remove();
+        }
+    });
+}
+
+document.getElementById('imagenes-input').addEventListener('change', function() {
+    const preview = document.getElementById('preview-nuevas');
+    preview.innerHTML = '';
+    Array.from(this.files).slice(0, 10).forEach((file, i) => {
+        const reader = new FileReader();
+        reader.onload = e => {
+            const col = document.createElement('div');
+            col.className = 'col-4 col-md-3';
+            col.innerHTML = `<img src="${e.target.result}" class="img-fluid rounded-3"
+                                  style="height:80px;width:100%;object-fit:cover">`;
+            preview.appendChild(col);
+        };
+        reader.readAsDataURL(file);
+    });
+});
+</script>
+{% endblock %}

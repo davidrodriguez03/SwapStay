@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Eliminar alojamiento" %}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5">
+            <div class="text-center mb-4">
+                <i class="fa-solid fa-triangle-exclamation text-danger" style="font-size: 2.5rem;"></i>
+                <h3 class="fw-bold mt-3">{% trans "Eliminar alojamiento" %}</h3>
+            </div>
+
+            <div class="card border-0 shadow-sm rounded-4 p-4">
+                <div class="alert alert-danger border-0 rounded-3">
+                    <div class="fw-semibold mb-1">{{ alojamiento.nombre }}</div>
+                    <div class="small text-muted">
+                        <i class="fa-solid fa-location-dot me-1"></i>
+                        {{ alojamiento.direccion }}, {{ alojamiento.ciudad }}
+                    </div>
+                </div>
+
+                <p class="text-muted small mb-4">
+                    {% trans "¿Estás seguro de que deseas eliminar este alojamiento? Esta acción no se puede deshacer. Todas las imágenes asociadas también serán eliminadas." %}
+                </p>
+
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-danger fw-semibold">
+                            <i class="fa-solid fa-trash me-2"></i>{% trans "Sí, eliminar" %}
+                        </button>
+                        <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary">
+                            <i class="fa-solid fa-arrow-left me-2"></i>{% trans "Cancelar" %}
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

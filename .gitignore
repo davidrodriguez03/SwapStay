@@ -26,8 +26,9 @@ staticfiles/
 *.log
 local_settings.py
 
-# Traducciones compiladas (se regeneran con compilemessages)
+# Traducciones compiladas — excluidas en general, pero las del proyecto se commitean
 *.mo
+!locale/**/*.mo
 
 # Editores e IDEs
 .vscode/

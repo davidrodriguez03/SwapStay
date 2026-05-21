@@ -5,7 +5,7 @@
 
 ---
 
-## 🚦 ESTADO DE IMPLEMENTACIÓN (2026-05-19)
+## 🚦 ESTADO DE IMPLEMENTACIÓN (2026-05-21)
 
 | Fase | Descripción | Estado |
 |------|-------------|--------|
@@ -15,6 +15,8 @@
 | **Fase 4** | Despliegue AWS (EC2 + scripts + settings prod) | ✅ COMPLETADO |
 | **Fase 5** | i18n ES/EN (locale, middleware, selector navbar) | ✅ COMPLETADO |
 | **Fase 6** | Adapter Pattern en Django (`reservas/domain/adapters/`) | ✅ COMPLETADO |
+| **Fase 7** | Roles, dashboards diferenciados, galería, mapa, registro | ✅ COMPLETADO |
+| **Fase 8** | Editar/eliminar alojamientos, compilar i18n, imágenes catálogo | ✅ COMPLETADO |
 
 ---
 
@@ -211,6 +213,31 @@ docker compose exec django python manage.py shell
 >>> from reservas.tasks import actualizar_tasas_cambio
 >>> actualizar_tasas_cambio.delay()
 ```
+
+---
+
+## 🆕 FASE 8 — Mejoras (2026-05-21)
+
+### Funcionalidades añadidas
+| Feature | Dónde | Detalle |
+|---------|-------|---------|
+| Editar alojamiento | `editar_alojamiento(pk)` | PUT campos base; POST nuevas imágenes |
+| Eliminar alojamiento | `eliminar_alojamiento(pk)` | Bloquea si tiene reservas CONFIRMADA/PENDIENTE |
+| Eliminar imagen | `eliminar_imagen_alojamiento(pk)` | Endpoint JSON; promueve siguiente si era principal |
+| Imágenes en catálogo | `catalogo.html` | Usa `get_imagen_principal()`, fallback gradiente |
+| i18n compilado | `locale/*/LC_MESSAGES/*.mo` | `compilemessages` corrige traducciones en frontend |
+
+### URLs nuevas
+```
+GET/POST /alojamientos/<pk>/editar/        → editar_alojamiento    name='editar_alojamiento'
+GET/POST /alojamientos/<pk>/eliminar/      → eliminar_alojamiento  name='eliminar_alojamiento'
+POST     /alojamientos/imagenes/<pk>/eliminar/ → eliminar_imagen_alojamiento name='eliminar_imagen'
+```
+
+### Causa raíz de traducciones
+Los archivos `.mo` no existían → Django no podía aplicar `{% trans %}`.
+Fix: `compilemessages` genera `locale/es/LC_MESSAGES/django.mo` y `locale/en/…/django.mo`.
+Para agregar strings nuevos en el futuro: `makemessages -l es -l en` → editar `.po` → `compilemessages`.
 
 ---
 
