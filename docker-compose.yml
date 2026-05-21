@@ -53,6 +53,8 @@ services:
     volumes:
       - ./:/app
       - static_volume:/app/staticfiles
+    env_file:
+      - .env
     environment:
       ENV_TYPE: development
       DB_ENGINE: postgres
@@ -65,7 +67,6 @@ services:
       CELERY_RESULT_BACKEND: redis://redis:6379/0
       NOTIFICACIONES_SERVICE_URL: http://flask-notificaciones:5002
       MONEDA_SERVICE_URL: http://flask-moneda:5005
-      ALLOWED_HOSTS: localhost,127.0.0.1,django,nginx
     depends_on:
       db:
         condition: service_healthy
