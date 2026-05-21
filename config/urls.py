@@ -1,5 +1,7 @@
 from django.contrib import admin
 from django.urls import include, path
+from django.conf import settings
+from django.conf.urls.static import static
 
 from reservas.api_public import (
     alojamientos_disponibles,
@@ -23,3 +25,6 @@ urlpatterns = [
     path('api/',    include('reservas.api_urls')),
     path('',        include('reservas.urls')),
 ]
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -1,17 +1,18 @@
 {% extends "base.html" %}
-{% load static %}
+{% load i18n %}
 
-{% block title %}Nueva Reserva{% endblock %}
+{% block title %}{% trans "Nueva Reserva" %}{% endblock %}
 
 {% block content %}
-<div class="container py-5" x-data="wizard()">
+<div class="container py-5"
+     x-data="wizard({ precioMensual: {{ alojamiento_preseleccionado.precio_mensual|default:0 }} })">
 
     <!-- Header -->
     <div class="row justify-content-center mb-5">
         <div class="col-lg-8 text-center">
-            <span class="badge bg-primary-subtle text-primary px-3 py-2 rounded-pill mb-3">Paso a paso</span>
-            <h2 class="fw-bold">Crear nueva reserva</h2>
-            <p class="text-muted">Completa cada paso para confirmar tu alojamiento</p>
+            <span class="badge bg-primary-subtle text-primary px-3 py-2 rounded-pill mb-3">{% trans "Paso a paso" %}</span>
+            <h2 class="fw-bold">{% trans "Crear nueva reserva" %}</h2>
+            <p class="text-muted">{% trans "Completa cada paso para confirmar tu alojamiento" %}</p>
         </div>
     </div>
 
@@ -19,35 +20,28 @@
     <div class="row justify-content-center mb-5">
         <div class="col-lg-8">
             <div class="d-flex align-items-center justify-content-center">
-                <!-- Paso 1 -->
-                <div class="step-item text-center" :class="{ 'active': paso >= 1, 'completed': paso > 1 }">
+                <div class="step-item text-center">
                     <div class="step-circle mx-auto mb-2"
                          :class="paso > 1 ? 'bg-success text-white' : paso === 1 ? 'bg-primary text-white' : 'bg-light text-muted'">
                         <span x-show="paso <= 1">1</span>
                         <i class="fa-solid fa-check" x-show="paso > 1"></i>
                     </div>
-                    <div class="small fw-semibold" :class="paso >= 1 ? 'text-primary' : 'text-muted'">Alojamiento</div>
+                    <div class="small fw-semibold" :class="paso >= 1 ? 'text-primary' : 'text-muted'">{% trans "Alojamiento" %}</div>
                 </div>
-
                 <div class="step-line" :class="paso > 1 ? 'bg-success' : 'bg-light'"></div>
-
-                <!-- Paso 2 -->
-                <div class="step-item text-center" :class="{ 'active': paso >= 2, 'completed': paso > 2 }">
+                <div class="step-item text-center">
                     <div class="step-circle mx-auto mb-2"
                          :class="paso > 2 ? 'bg-success text-white' : paso === 2 ? 'bg-primary text-white' : 'bg-light text-muted'">
                         <span x-show="paso <= 2">2</span>
                         <i class="fa-solid fa-check" x-show="paso > 2"></i>
                     </div>
-                    <div class="small fw-semibold" :class="paso >= 2 ? 'text-primary' : 'text-muted'">Fechas</div>
+                    <div class="small fw-semibold" :class="paso >= 2 ? 'text-primary' : 'text-muted'">{% trans "Fechas" %}</div>
                 </div>
-
                 <div class="step-line" :class="paso > 2 ? 'bg-success' : 'bg-light'"></div>
-
-                <!-- Paso 3 -->
                 <div class="step-item text-center">
                     <div class="step-circle mx-auto mb-2"
                          :class="paso === 3 ? 'bg-primary text-white' : 'bg-light text-muted'">3</div>
-                    <div class="small fw-semibold" :class="paso === 3 ? 'text-primary' : 'text-muted'">Confirmación</div>
+                    <div class="small fw-semibold" :class="paso === 3 ? 'text-primary' : 'text-muted'">{% trans "Confirmación" %}</div>
                 </div>
             </div>
         </div>
@@ -59,67 +53,88 @@
             <form method="post" id="reserva-form">
                 {% csrf_token %}
 
-                <!-- ===== PASO 1: Elegir alojamiento ===== -->
+                <!-- Card: quién reserva (fija, siempre visible) -->
+                <div class="card border-0 bg-light rounded-4 p-3 mb-4">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="icon-circle bg-primary-subtle">
+                            <i class="fa-solid fa-graduation-cap text-primary"></i>
+                        </div>
+                        <div>
+                            <div class="small text-muted fw-semibold text-uppercase">{% trans "Reservando como" %}</div>
+                            <div class="fw-semibold">{{ request.user.get_full_name|default:request.user.username }}</div>
+                            <div class="small text-muted">{{ estudiante.institucion }} &middot; {{ request.user.email }}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PASO 1: Alojamiento -->
                 <div x-show="paso === 1" x-transition>
                     <div class="card border-0 shadow-sm rounded-4 p-4 mb-4">
                         <h5 class="fw-bold mb-4">
                             <i class="fa-solid fa-house text-primary me-2"></i>
-                            Selecciona el alojamiento
+                            {% trans "Selecciona el alojamiento" %}
                         </h5>
 
-                        <div class="mb-4">
-                            <label class="form-label fw-semibold">Estudiante</label>
-                            {{ form.estudiante }}
-                            {% if form.estudiante.errors %}
-                            <div class="invalid-feedback d-block">{{ form.estudiante.errors.0 }}</div>
-                            {% endif %}
-                        </div>
-
-                        <div class="mb-2">
-                            <label class="form-label fw-semibold">Alojamiento disponible</label>
-                            <div class="position-relative">
-                                {{ form.alojamiento }}
-                                <i class="fa-solid fa-house position-absolute top-50 start-0 translate-middle-y ms-3 text-muted"></i>
+                        {% if alojamiento_preseleccionado %}
+                        <!-- Alojamiento pre-cargado desde el catálogo -->
+                        <input type="hidden" name="alojamiento" value="{{ alojamiento_preseleccionado.pk }}">
+                        <div class="card border-primary rounded-3 p-3 mb-2">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <div class="fw-semibold">{{ alojamiento_preseleccionado.nombre }}</div>
+                                    <div class="text-muted small">
+                                        <i class="fa-solid fa-location-dot me-1"></i>
+                                        {{ alojamiento_preseleccionado.ciudad }}
+                                    </div>
+                                </div>
+                                <div class="text-end">
+                                    <div class="fw-bold text-primary">
+                                        ${{ alojamiento_preseleccionado.precio_mensual|floatformat:0 }}
+                                    </div>
+                                    <div class="text-muted" style="font-size:0.75rem">COP/mes</div>
+                                </div>
                             </div>
+                        </div>
+                        <div class="text-muted small">
+                            <i class="fa-solid fa-circle-info me-1 text-primary"></i>
+                            <a href="{% url 'catalogo' %}" class="text-primary">{% trans "Cambiar alojamiento" %}</a>
+                        </div>
+                        {% else %}
+                        <div class="mb-2">
+                            <label class="form-label fw-semibold">{% trans "Alojamiento disponible" %}</label>
+                            {{ form.alojamiento }}
                             {% if form.alojamiento.errors %}
                             <div class="invalid-feedback d-block">{{ form.alojamiento.errors.0 }}</div>
                             {% endif %}
                         </div>
-
-                        <div class="bg-light rounded-3 p-3 mt-3">
-                            <p class="small text-muted mb-0">
-                                <i class="fa-solid fa-circle-info me-1 text-primary"></i>
-                                Solo se muestran alojamientos actualmente disponibles
-                            </p>
-                        </div>
+                        {% endif %}
                     </div>
 
                     <div class="d-flex justify-content-end">
-                        <button type="button" class="btn btn-primary fw-semibold px-4"
-                                @click="irPaso(2)">
-                            Siguiente <i class="fa-solid fa-arrow-right ms-2"></i>
+                        <button type="button" class="btn btn-primary fw-semibold px-4" @click="irPaso(2)">
+                            {% trans "Siguiente" %} <i class="fa-solid fa-arrow-right ms-2"></i>
                         </button>
                     </div>
                 </div>
 
-                <!-- ===== PASO 2: Fechas ===== -->
+                <!-- PASO 2: Fechas -->
                 <div x-show="paso === 2" x-transition>
                     <div class="card border-0 shadow-sm rounded-4 p-4 mb-4">
                         <h5 class="fw-bold mb-4">
                             <i class="fa-solid fa-calendar text-primary me-2"></i>
-                            Selecciona las fechas de tu estadía
+                            {% trans "Selecciona las fechas de tu estadía" %}
                         </h5>
 
                         <div class="row g-3 mb-4">
                             <div class="col-md-6">
-                                <label class="form-label fw-semibold">Fecha de entrada</label>
+                                <label class="form-label fw-semibold">{% trans "Fecha de entrada" %}</label>
                                 {{ form.fecha_inicio }}
                                 {% if form.fecha_inicio.errors %}
                                 <div class="invalid-feedback d-block">{{ form.fecha_inicio.errors.0 }}</div>
                                 {% endif %}
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label fw-semibold">Fecha de salida</label>
+                                <label class="form-label fw-semibold">{% trans "Fecha de salida" %}</label>
                                 {{ form.fecha_fin }}
                                 {% if form.fecha_fin.errors %}
                                 <div class="invalid-feedback d-block">{{ form.fecha_fin.errors.0 }}</div>
@@ -127,86 +142,97 @@
                             </div>
                         </div>
 
-                        <!-- Resumen de días -->
+                        <!-- Resumen en tiempo real -->
                         <div class="bg-primary-subtle rounded-3 p-3" x-show="diasEstadia > 0">
                             <div class="row text-center g-2">
                                 <div class="col-4">
                                     <div class="fw-bold text-primary fs-4" x-text="diasEstadia"></div>
-                                    <div class="small text-muted">días</div>
+                                    <div class="small text-muted">{% trans "días" %}</div>
                                 </div>
                                 <div class="col-4">
                                     <div class="fw-bold text-primary fs-4" x-text="mesesEstadia"></div>
-                                    <div class="small text-muted">meses aprox.</div>
+                                    <div class="small text-muted">{% trans "meses aprox." %}</div>
                                 </div>
                                 <div class="col-4">
-                                    <div class="fw-bold text-success fs-5" x-text="'$' + costoEstimado.toLocaleString('es-CO')"></div>
-                                    <div class="small text-muted">COP estimado</div>
+                                    <div class="fw-bold text-success fs-5"
+                                         x-text="'$' + costoEstimadoCOP.toLocaleString('es-CO')"></div>
+                                    <div class="small text-muted">COP</div>
                                 </div>
                             </div>
+                            <hr class="my-2">
+                            <div class="text-center small text-muted">
+                                {% trans "Aprox." %} USD <span x-text="costoEstimadoUSD"></span>
+                                <span class="ms-1 opacity-50">({% trans "tasa" %} <span x-text="tasaFormateada"></span>)</span>
+                            </div>
+                        </div>
+
+                        <div class="alert alert-warning small mt-3 mb-0">
+                            <i class="fa-solid fa-circle-info me-1"></i>
+                            {% trans "La duración mínima es de 30 días (1 mes)." %}
                         </div>
                     </div>
 
                     <div class="d-flex justify-content-between">
                         <button type="button" class="btn btn-outline-secondary px-4" @click="irPaso(1)">
-                            <i class="fa-solid fa-arrow-left me-2"></i>Anterior
+                            <i class="fa-solid fa-arrow-left me-2"></i>{% trans "Anterior" %}
                         </button>
                         <button type="button" class="btn btn-primary fw-semibold px-4" @click="irPaso(3)">
-                            Siguiente <i class="fa-solid fa-arrow-right ms-2"></i>
+                            {% trans "Siguiente" %} <i class="fa-solid fa-arrow-right ms-2"></i>
                         </button>
                     </div>
                 </div>
 
-                <!-- ===== PASO 3: Confirmación ===== -->
+                <!-- PASO 3: Confirmación -->
                 <div x-show="paso === 3" x-transition>
                     <div class="card border-0 shadow-sm rounded-4 p-4 mb-4">
                         <h5 class="fw-bold mb-4">
                             <i class="fa-solid fa-clipboard-check text-primary me-2"></i>
-                            Confirma tu reserva
+                            {% trans "Confirma tu reserva" %}
                         </h5>
 
                         <div class="list-group list-group-flush rounded-3 border mb-4">
                             <div class="list-group-item d-flex justify-content-between py-3">
-                                <span class="text-muted fw-semibold small text-uppercase">Alojamiento</span>
+                                <span class="text-muted fw-semibold small text-uppercase">{% trans "Alojamiento" %}</span>
                                 <span class="fw-semibold text-end" id="resumen-alojamiento">—</span>
                             </div>
                             <div class="list-group-item d-flex justify-content-between py-3">
-                                <span class="text-muted fw-semibold small text-uppercase">Estudiante</span>
-                                <span class="fw-semibold text-end" id="resumen-estudiante">—</span>
+                                <span class="text-muted fw-semibold small text-uppercase">{% trans "Estudiante" %}</span>
+                                <span class="fw-semibold">{{ request.user.get_full_name }}</span>
                             </div>
                             <div class="list-group-item d-flex justify-content-between py-3">
-                                <span class="text-muted fw-semibold small text-uppercase">Entrada</span>
+                                <span class="text-muted fw-semibold small text-uppercase">{% trans "Entrada" %}</span>
                                 <span class="fw-semibold" x-text="fechaInicioStr || '—'"></span>
                             </div>
                             <div class="list-group-item d-flex justify-content-between py-3">
-                                <span class="text-muted fw-semibold small text-uppercase">Salida</span>
+                                <span class="text-muted fw-semibold small text-uppercase">{% trans "Salida" %}</span>
                                 <span class="fw-semibold" x-text="fechaFinStr || '—'"></span>
                             </div>
                             <div class="list-group-item d-flex justify-content-between py-3">
-                                <span class="text-muted fw-semibold small text-uppercase">Duración</span>
-                                <span class="fw-semibold" x-text="diasEstadia + ' días'"></span>
+                                <span class="text-muted fw-semibold small text-uppercase">{% trans "Duración" %}</span>
+                                <span class="fw-semibold" x-text="diasEstadia + ' {% trans 'días' %}'"></span>
                             </div>
                         </div>
 
                         <div class="bg-success-subtle rounded-3 p-4 text-center mb-4">
-                            <div class="text-muted small mb-1">Costo total estimado</div>
+                            <div class="text-muted small mb-1">{% trans "Costo total estimado" %}</div>
                             <div class="display-6 fw-bold text-success"
-                                 x-text="'$' + costoEstimado.toLocaleString('es-CO')">
-                            </div>
-                            <div class="text-muted small">COP (precio mensual prorrateado)</div>
+                                 x-text="'$' + costoEstimadoCOP.toLocaleString('es-CO')"></div>
+                            <div class="text-muted small">COP</div>
+                            <div class="text-muted small mt-1">≈ USD <span x-text="costoEstimadoUSD"></span></div>
                         </div>
 
                         <div class="alert alert-info border-0 rounded-3 small">
                             <i class="fa-solid fa-circle-info me-2"></i>
-                            Al confirmar, el alojamiento quedará marcado como reservado y recibirás una notificación de confirmación.
+                            {% trans "Al confirmar, el alojamiento quedará marcado como reservado." %}
                         </div>
                     </div>
 
                     <div class="d-flex justify-content-between">
                         <button type="button" class="btn btn-outline-secondary px-4" @click="irPaso(2)">
-                            <i class="fa-solid fa-arrow-left me-2"></i>Anterior
+                            <i class="fa-solid fa-arrow-left me-2"></i>{% trans "Anterior" %}
                         </button>
                         <button type="submit" class="btn btn-success fw-semibold px-5">
-                            <i class="fa-solid fa-calendar-check me-2"></i>Confirmar reserva
+                            <i class="fa-solid fa-calendar-check me-2"></i>{% trans "Confirmar reserva" %}
                         </button>
                     </div>
                 </div>
@@ -219,25 +245,30 @@
 
 {% block extra_js %}
 <script>
-function wizard() {
-    const precioPorMes = 0; // se calcula según selección
-
+function wizard({ precioMensual }) {
     return {
         paso: 1,
         diasEstadia: 0,
         mesesEstadia: '0',
-        costoEstimado: 0,
+        costoEstimadoCOP: 0,
+        costoEstimadoUSD: '...',
         fechaInicioStr: '',
         fechaFinStr: '',
+        tasa: 4100,
+        tasaFormateada: '4,100',
 
-        irPaso(n) {
-            if (n === 3) this.actualizarResumen();
-            this.paso = n;
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        },
+        async init() {
+            try {
+                const r = await fetch('https://open.er-api.com/v6/latest/USD');
+                const d = await r.json();
+                if (d.rates?.COP) {
+                    this.tasa = d.rates.COP;
+                    this.tasaFormateada = this.tasa.toLocaleString('es-CO', { maximumFractionDigits: 0 });
+                }
+            } catch(e) {}
 
-        init() {
-            const preselect = new URLSearchParams(window.location.search).get('alojamiento');
+            const params = new URLSearchParams(window.location.search);
+            const preselect = params.get('alojamiento');
             if (preselect) {
                 const sel = document.querySelector('[name="alojamiento"]');
                 if (sel) sel.value = preselect;
@@ -245,6 +276,12 @@ function wizard() {
 
             document.querySelector('[name="fecha_inicio"]')?.addEventListener('change', () => this.calcularDias());
             document.querySelector('[name="fecha_fin"]')?.addEventListener('change', () => this.calcularDias());
+        },
+
+        irPaso(n) {
+            if (n === 3) this.actualizarResumen();
+            this.paso = n;
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         },
 
         calcularDias() {
@@ -256,19 +293,28 @@ function wizard() {
             this.mesesEstadia = (dias / 30).toFixed(1);
             this.fechaInicioStr = fi;
             this.fechaFinStr = ff;
-            // Estimar costo desde el select
+
+            const precio = precioMensual || this._getPrecioDelSelect();
+            this.costoEstimadoCOP = Math.round(precio * dias / 30);
+            this.costoEstimadoUSD = (this.costoEstimadoCOP / this.tasa).toLocaleString('en-US', {
+                minimumFractionDigits: 2, maximumFractionDigits: 2
+            });
+        },
+
+        _getPrecioDelSelect() {
             const sel = document.querySelector('[name="alojamiento"]');
             const texto = sel?.selectedOptions[0]?.text || '';
             const match = texto.match(/[\d.,]+/);
-            const precio = match ? parseFloat(match[0].replace(/[.,]/g, '')) : 1500000;
-            this.costoEstimado = Math.round(precio * dias / 30);
+            return match ? parseFloat(match[0].replace(/[.,]/g, '')) : 1500000;
         },
 
         actualizarResumen() {
             const selAloj = document.querySelector('[name="alojamiento"]');
-            const selEst = document.querySelector('[name="estudiante"]');
-            if (selAloj) document.getElementById('resumen-alojamiento').textContent = selAloj.selectedOptions[0]?.text || '—';
-            if (selEst) document.getElementById('resumen-estudiante').textContent = selEst.selectedOptions[0]?.text || '—';
+            const elResumen = document.getElementById('resumen-alojamiento');
+            if (selAloj && elResumen) {
+                elResumen.textContent = selAloj.selectedOptions[0]?.text
+                    || '{{ alojamiento_preseleccionado.nombre|default:"—" }}';
+            }
             this.calcularDias();
         }
     };

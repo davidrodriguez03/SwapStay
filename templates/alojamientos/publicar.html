@@ -1,0 +1,192 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Publicar alojamiento" %}{% endblock %}
+
+{% block content %}
+<div class="container py-5" x-data="{ tipo: 'alojamiento' }">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="text-center mb-4">
+                <i class="fa-solid fa-house-circle-plus text-primary" style="font-size: 2.5rem;"></i>
+                <h3 class="fw-bold mt-3">{% trans "Publicar alojamiento" %}</h3>
+                <p class="text-muted">{% trans "Completa la información para publicar tu propiedad" %}</p>
+            </div>
+
+            {% if form.non_field_errors %}
+            <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+            {% endif %}
+
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+
+                <!-- Tipo -->
+                <div class="card border-0 shadow-sm rounded-4 p-4 mb-4">
+                    <h6 class="fw-bold mb-3">{% trans "Tipo de propiedad" %}</h6>
+                    <div class="row g-3">
+                        {% for val, label in form.fields.tipo.choices %}
+                        <div class="col-4">
+                            <label class="d-block cursor-pointer">
+                                <input type="radio" name="tipo" value="{{ val }}"
+                                       x-model="tipo" class="d-none"
+                                       {% if val == 'alojamiento' %}checked{% endif %}>
+                                <div class="card text-center p-3"
+                                     :class="tipo === '{{ val }}' ? 'border-primary bg-primary-subtle' : 'border'">
+                                    <i class="fa-solid fa-{% if val == 'casa' %}house{% elif val == 'apartamento' %}building{% else %}door-open{% endif %} fa-2x mb-2"
+                                       :class="tipo === '{{ val }}' ? 'text-primary' : 'text-muted'"></i>
+                                    <div class="small fw-semibold">{{ label }}</div>
+                                </div>
+                            </label>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Info básica -->
+                <div class="card border-0 shadow-sm rounded-4 p-4 mb-4">
+                    <h6 class="fw-bold mb-3">{% trans "Información básica" %}</h6>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small">{% trans "Nombre del alojamiento" %} *</label>
+                        <input type="text" name="nombre" class="form-control"
+                               placeholder="{% trans 'Ej: Apartamento luminoso centro' %}" required
+                               value="{{ form.nombre.value|default:'' }}">
+                    </div>
+                    <div class="row g-3 mb-3">
+                        <div class="col-8">
+                            <label class="form-label fw-semibold small">{% trans "Dirección" %} *</label>
+                            <input type="text" name="direccion" class="form-control"
+                                   placeholder="Calle 10 # 50-20" required
+                                   value="{{ form.direccion.value|default:'' }}">
+                        </div>
+                        <div class="col-4">
+                            <label class="form-label fw-semibold small">{% trans "Ciudad" %} *</label>
+                            <input type="text" name="ciudad" class="form-control"
+                                   placeholder="Medellín" required
+                                   value="{{ form.ciudad.value|default:'' }}">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small">{% trans "Precio mensual (COP)" %} *</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light">$</span>
+                            <input type="number" name="precio_mensual" class="form-control"
+                                   placeholder="1500000" min="0" step="50000" required
+                                   value="{{ form.precio_mensual.value|default:'' }}">
+                            <span class="input-group-text bg-light text-muted">COP</span>
+                        </div>
+                    </div>
+                    <div class="mb-0">
+                        <label class="form-label fw-semibold small">{% trans "Descripción completa" %}</label>
+                        <textarea name="descripcion_completa" class="form-control" rows="5"
+                                  placeholder="{% trans 'Describe las características, comodidades, normas de convivencia...' %}">{{ form.descripcion_completa.value|default:'' }}</textarea>
+                    </div>
+                </div>
+
+                <!-- Características según tipo -->
+                <div class="card border-0 shadow-sm rounded-4 p-4 mb-4" x-show="tipo === 'casa'" x-transition>
+                    <h6 class="fw-bold mb-3"><i class="fa-solid fa-house me-2 text-primary"></i>{% trans "Características de la casa" %}</h6>
+                    <div class="row g-3">
+                        <div class="col-4">
+                            <label class="form-label fw-semibold small">{% trans "Número de pisos" %}</label>
+                            <input type="number" name="numero_pisos" class="form-control" min="1" value="1">
+                        </div>
+                        <div class="col-4 d-flex align-items-end pb-1">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="tiene_patio" id="tiene_patio">
+                                <label class="form-check-label fw-semibold small" for="tiene_patio">{% trans "Tiene patio" %}</label>
+                            </div>
+                        </div>
+                        <div class="col-4 d-flex align-items-end pb-1">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="tiene_garaje" id="tiene_garaje">
+                                <label class="form-check-label fw-semibold small" for="tiene_garaje">{% trans "Tiene garaje" %}</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card border-0 shadow-sm rounded-4 p-4 mb-4" x-show="tipo === 'apartamento'" x-transition>
+                    <h6 class="fw-bold mb-3"><i class="fa-solid fa-building me-2 text-primary"></i>{% trans "Características del apartamento" %}</h6>
+                    <div class="row g-3">
+                        <div class="col-4">
+                            <label class="form-label fw-semibold small">{% trans "Número de piso" %}</label>
+                            <input type="number" name="numero_piso" class="form-control" min="1" value="1">
+                        </div>
+                        <div class="col-4 d-flex align-items-end pb-1">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="tiene_ascensor" id="tiene_ascensor">
+                                <label class="form-check-label fw-semibold small" for="tiene_ascensor">{% trans "Tiene ascensor" %}</label>
+                            </div>
+                        </div>
+                        <div class="col-4 d-flex align-items-end pb-1">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="tiene_porteria" id="tiene_porteria">
+                                <label class="form-check-label fw-semibold small" for="tiene_porteria">{% trans "Tiene portería" %}</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Ubicación en mapa (coordenadas opcionales) -->
+                <div class="card border-0 shadow-sm rounded-4 p-4 mb-4">
+                    <h6 class="fw-bold mb-1"><i class="fa-solid fa-location-dot me-2 text-primary"></i>{% trans "Coordenadas (opcional)" %}</h6>
+                    <p class="text-muted small mb-3">{% trans "Agrega coordenadas para mostrar el mapa interactivo en el detalle." %}</p>
+                    <div class="row g-3">
+                        <div class="col-6">
+                            <label class="form-label fw-semibold small">{% trans "Latitud" %}</label>
+                            <input type="number" name="latitud" class="form-control" step="0.000001"
+                                   placeholder="6.244203" value="{{ form.latitud.value|default:'' }}">
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label fw-semibold small">{% trans "Longitud" %}</label>
+                            <input type="number" name="longitud" class="form-control" step="0.000001"
+                                   placeholder="-75.581211" value="{{ form.longitud.value|default:'' }}">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Imágenes -->
+                <div class="card border-0 shadow-sm rounded-4 p-4 mb-4">
+                    <h6 class="fw-bold mb-1"><i class="fa-solid fa-images me-2 text-primary"></i>{% trans "Imágenes" %}</h6>
+                    <p class="text-muted small mb-3">{% trans "Sube hasta 10 fotos. La primera será la imagen principal." %}</p>
+                    <input type="file" name="imagenes" class="form-control" multiple accept="image/*"
+                           id="imagenes-input">
+                    <div id="preview-imagenes" class="row g-2 mt-2"></div>
+                </div>
+
+                <div class="d-grid gap-2">
+                    <button type="submit" class="btn btn-primary btn-lg fw-semibold">
+                        <i class="fa-solid fa-house-circle-plus me-2"></i>{% trans "Publicar alojamiento" %}
+                    </button>
+                    <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary">
+                        <i class="fa-solid fa-arrow-left me-2"></i>{% trans "Cancelar" %}
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.getElementById('imagenes-input').addEventListener('change', function() {
+    const preview = document.getElementById('preview-imagenes');
+    preview.innerHTML = '';
+    Array.from(this.files).slice(0, 10).forEach((file, i) => {
+        const reader = new FileReader();
+        reader.onload = e => {
+            const col = document.createElement('div');
+            col.className = 'col-4 col-md-3';
+            col.innerHTML = `
+                <div class="position-relative">
+                    <img src="${e.target.result}" class="img-fluid rounded-3" style="height:80px;width:100%;object-fit:cover">
+                    ${i === 0 ? '<span class="position-absolute top-0 start-0 badge bg-primary m-1" style="font-size:0.6rem">Principal</span>' : ''}
+                </div>`;
+            preview.appendChild(col);
+        };
+        reader.readAsDataURL(file);
+    });
+});
+</script>
+{% endblock %}

@@ -20,7 +20,38 @@
         <!-- Columna principal -->
         <div class="col-lg-8">
 
-            <!-- Imagen principal placeholder -->
+            <!-- Galería / Imagen principal -->
+            {% if imagenes %}
+            <div id="carouselAlojamiento" class="carousel slide rounded-4 overflow-hidden mb-4" style="height:380px">
+                <div class="carousel-inner h-100">
+                    {% for img in imagenes %}
+                    <div class="carousel-item {% if forloop.first %}active{% endif %} h-100">
+                        <img src="{{ img.imagen.url }}" class="d-block w-100 h-100"
+                             style="object-fit:cover" alt="{{ alojamiento.nombre }}">
+                    </div>
+                    {% endfor %}
+                </div>
+                {% if imagenes|length > 1 %}
+                <button class="carousel-control-prev" type="button" data-bs-target="#carouselAlojamiento" data-bs-slide="prev">
+                    <span class="carousel-control-prev-icon"></span>
+                </button>
+                <button class="carousel-control-next" type="button" data-bs-target="#carouselAlojamiento" data-bs-slide="next">
+                    <span class="carousel-control-next-icon"></span>
+                </button>
+                {% endif %}
+                <div class="position-absolute bottom-0 start-0 end-0 p-4"
+                     style="background: linear-gradient(transparent, rgba(0,0,0,0.7));">
+                    <div class="d-flex gap-2">
+                        <span class="badge bg-white text-dark fw-semibold px-3 py-2">{{ tipo }}</span>
+                        {% if alojamiento.disponible %}
+                        <span class="badge bg-success px-3 py-2"><i class="fa-solid fa-circle-check me-1"></i>Disponible</span>
+                        {% else %}
+                        <span class="badge bg-secondary px-3 py-2">No disponible</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% else %}
             <div class="rounded-4 overflow-hidden mb-4 position-relative" style="height: 380px; background: linear-gradient(135deg, #0066CC 0%, #004499 100%);">
                 <div class="d-flex align-items-center justify-content-center h-100">
                     <i class="fa-solid fa-{% if tipo == 'Casa' %}house{% else %}building{% endif %} text-white opacity-25" style="font-size: 8rem;"></i>
@@ -28,20 +59,16 @@
                 <div class="position-absolute bottom-0 start-0 end-0 p-4"
                      style="background: linear-gradient(transparent, rgba(0,0,0,0.7));">
                     <div class="d-flex gap-2">
-                        <span class="badge bg-white text-dark fw-semibold px-3 py-2">
-                            <i class="fa-solid fa-{% if tipo == 'Casa' %}house{% else %}building{% endif %} me-1"></i>
-                            {{ tipo }}
-                        </span>
+                        <span class="badge bg-white text-dark fw-semibold px-3 py-2">{{ tipo }}</span>
                         {% if alojamiento.disponible %}
-                        <span class="badge bg-success px-3 py-2">
-                            <i class="fa-solid fa-circle-check me-1"></i>Disponible
-                        </span>
+                        <span class="badge bg-success px-3 py-2"><i class="fa-solid fa-circle-check me-1"></i>Disponible</span>
                         {% else %}
                         <span class="badge bg-secondary px-3 py-2">No disponible</span>
                         {% endif %}
                     </div>
                 </div>
             </div>
+            {% endif %}
 
             <!-- Info principal -->
             <h1 class="fw-bold mb-2">{{ alojamiento.nombre }}</h1>
@@ -130,25 +157,40 @@
                 </div>
             </div>
 
-            <!-- Mapa placeholder -->
+            <!-- Descripción completa -->
+            {% if alojamiento.descripcion_completa %}
+            <div class="card border-0 shadow-sm rounded-4 mb-4">
+                <div class="card-body p-4">
+                    <h5 class="fw-bold mb-3">
+                        <i class="fa-solid fa-align-left text-primary me-2"></i>Descripción
+                    </h5>
+                    <p class="text-muted mb-0" style="white-space: pre-line;">{{ alojamiento.descripcion_completa }}</p>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Mapa -->
             <div class="card border-0 shadow-sm rounded-4 mb-4">
                 <div class="card-body p-4">
                     <h5 class="fw-bold mb-3">
                         <i class="fa-solid fa-map-location-dot text-primary me-2"></i>Ubicación
                     </h5>
+                    {% if alojamiento.latitud and alojamiento.longitud %}
+                    <div id="map" style="height: 300px; border-radius: 8px;"></div>
+                    {% else %}
                     <div class="rounded-3 overflow-hidden d-flex align-items-center justify-content-center bg-light border"
-                         style="height: 250px;">
+                         style="height: 200px;">
                         <div class="text-center text-muted">
                             <i class="fa-solid fa-map fa-3x mb-3 opacity-30"></i>
-                            <p class="fw-semibold">{{ alojamiento.direccion }}</p>
-                            <p class="small">{{ alojamiento.ciudad }}</p>
+                            <p class="fw-semibold mb-1">{{ alojamiento.direccion }}</p>
+                            <p class="small mb-3">{{ alojamiento.ciudad }}</p>
                             <a href="https://maps.google.com/?q={{ alojamiento.direccion|urlencode }},{{ alojamiento.ciudad|urlencode }}"
                                target="_blank" class="btn btn-outline-primary btn-sm">
-                                <i class="fa-solid fa-arrow-up-right-from-square me-1"></i>
-                                Ver en Google Maps
+                                <i class="fa-solid fa-arrow-up-right-from-square me-1"></i>Ver en Google Maps
                             </a>
                         </div>
                     </div>
+                    {% endif %}
                 </div>
             </div>
 
@@ -216,10 +258,17 @@
 
                     {% if alojamiento.disponible %}
                         {% if request.user.is_authenticated %}
-                        <a href="{% url 'crear_reserva' %}?alojamiento={{ alojamiento.pk }}"
-                           class="btn btn-primary w-100 btn-lg fw-semibold">
-                            <i class="fa-solid fa-calendar-plus me-2"></i>Reservar ahora
-                        </a>
+                            {% if es_estudiante %}
+                            <a href="{% url 'crear_reserva' %}?alojamiento={{ alojamiento.pk }}"
+                               class="btn btn-primary w-100 btn-lg fw-semibold">
+                                <i class="fa-solid fa-calendar-plus me-2"></i>Reservar ahora
+                            </a>
+                            {% else %}
+                            <div class="alert alert-info small mb-0">
+                                <i class="fa-solid fa-circle-info me-2"></i>
+                                Solo estudiantes pueden hacer reservas.
+                            </div>
+                            {% endif %}
                         {% else %}
                         <a href="{% url 'login' %}?next={% url 'detalle_alojamiento' alojamiento.pk %}"
                            class="btn btn-primary w-100 btn-lg fw-semibold">
@@ -242,7 +291,30 @@
 </div>
 {% endblock %}
 
+{% block extra_head %}
+{% if alojamiento.latitud and alojamiento.longitud %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+{% endif %}
+{% endblock %}
+
 {% block extra_js %}
+{% if alojamiento.latitud and alojamiento.longitud %}
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+(function() {
+    const lat = {{ alojamiento.latitud }};
+    const lng = {{ alojamiento.longitud }};
+    const map = L.map('map').setView([lat, lng], 15);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://openstreetmap.org">OpenStreetMap</a> contributors'
+    }).addTo(map);
+    L.marker([lat, lng]).addTo(map)
+        .bindPopup('<strong>{{ alojamiento.nombre }}</strong><br>{{ alojamiento.direccion }}')
+        .openPopup();
+})();
+</script>
+{% endif %}
+
 <script>
 function detalle({ precio }) {
     return {

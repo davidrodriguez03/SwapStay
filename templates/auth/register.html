@@ -1,61 +1,249 @@
 {% extends "base.html" %}
+{% load i18n %}
 
-{% block title %}Crear Cuenta{% endblock %}
+{% block title %}{% trans "Crear Cuenta" %}{% endblock %}
 
 {% block content %}
-<div class="container py-5">
+<div class="container py-5" x-data="{ userType: '{{ user_type_selected|default:'estudiante' }}' }">
     <div class="row justify-content-center">
-        <div class="col-md-6 col-lg-5">
+        <div class="col-md-7 col-lg-6">
             <div class="text-center mb-4">
                 <i class="fa-solid fa-user-plus text-primary" style="font-size: 2.5rem;"></i>
-                <h3 class="fw-bold mt-3">Crea tu cuenta</h3>
-                <p class="text-muted">Únete a SwapStay y encuentra tu alojamiento ideal</p>
+                <h3 class="fw-bold mt-3">{% trans "Crea tu cuenta" %}</h3>
+                <p class="text-muted">{% trans "Únete a SwapStay" %}</p>
             </div>
 
-            <div class="card border-0 shadow-sm rounded-4 p-4">
-                <form method="post">
-                    {% csrf_token %}
-                    <div class="row g-3 mb-3">
-                        <div class="col-6">
-                            <label class="form-label fw-semibold small">Nombre</label>
-                            <input type="text" name="first_name" class="form-control" placeholder="Juan" required>
+            <!-- Selector de rol -->
+            <div class="card border-0 shadow-sm rounded-4 p-4 mb-4">
+                <h6 class="fw-bold mb-3">{% trans "¿Cómo quieres usar SwapStay?" %}</h6>
+                <div class="row g-3">
+                    <div class="col-6">
+                        <label class="d-block cursor-pointer">
+                            <input type="radio" name="_role_selector" value="estudiante"
+                                   x-model="userType" class="d-none">
+                            <div class="card text-center p-3 h-100"
+                                 :class="userType === 'estudiante' ? 'border-primary bg-primary-subtle' : 'border'">
+                                <i class="fa-solid fa-graduation-cap fa-2x mb-2"
+                                   :class="userType === 'estudiante' ? 'text-primary' : 'text-muted'"></i>
+                                <div class="fw-semibold small">{% trans "Estudiante" %}</div>
+                                <div class="text-muted" style="font-size:0.72rem">{% trans "Busco alojamiento" %}</div>
+                            </div>
+                        </label>
+                    </div>
+                    <div class="col-6">
+                        <label class="d-block cursor-pointer">
+                            <input type="radio" name="_role_selector" value="arrendador"
+                                   x-model="userType" class="d-none">
+                            <div class="card text-center p-3 h-100"
+                                 :class="userType === 'arrendador' ? 'border-primary bg-primary-subtle' : 'border'">
+                                <i class="fa-solid fa-house-user fa-2x mb-2"
+                                   :class="userType === 'arrendador' ? 'text-primary' : 'text-muted'"></i>
+                                <div class="fw-semibold small">{% trans "Arrendador" %}</div>
+                                <div class="text-muted" style="font-size:0.72rem">{% trans "Publico alojamientos" %}</div>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== FORMULARIO ESTUDIANTE ===== -->
+            <div x-show="userType === 'estudiante'" x-transition>
+                <div class="card border-0 shadow-sm rounded-4 p-4">
+                    {% if form_estudiante.non_field_errors %}
+                    <div class="alert alert-danger small">{{ form_estudiante.non_field_errors }}</div>
+                    {% endif %}
+
+                    <form method="post">
+                        {% csrf_token %}
+                        <input type="hidden" name="user_type" value="estudiante">
+
+                        <div class="row g-3 mb-3">
+                            <div class="col-6">
+                                <label class="form-label fw-semibold small">{% trans "Nombre" %}</label>
+                                <input type="text" name="est-first_name" class="form-control"
+                                       placeholder="Juan" required
+                                       value="{{ form_estudiante.first_name.value|default:'' }}">
+                                {% if form_estudiante.first_name.errors %}
+                                <div class="text-danger small">{{ form_estudiante.first_name.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label fw-semibold small">{% trans "Apellido" %}</label>
+                                <input type="text" name="est-last_name" class="form-control"
+                                       placeholder="Pérez"
+                                       value="{{ form_estudiante.last_name.value|default:'' }}">
+                            </div>
                         </div>
-                        <div class="col-6">
-                            <label class="form-label fw-semibold small">Apellido</label>
-                            <input type="text" name="last_name" class="form-control" placeholder="Pérez">
+
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold small">{% trans "Usuario" %}</label>
+                            <input type="text" name="est-username" class="form-control"
+                                   placeholder="mi_usuario" required
+                                   value="{{ form_estudiante.username.value|default:'' }}">
+                            {% if form_estudiante.username.errors %}
+                            <div class="text-danger small">{{ form_estudiante.username.errors.0 }}</div>
+                            {% endif %}
                         </div>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold small">Nombre de usuario</label>
-                        <div class="input-group">
-                            <span class="input-group-text bg-light"><i class="fa-solid fa-at text-muted"></i></span>
-                            <input type="text" name="username" class="form-control" placeholder="mi_usuario" required>
+
+                        <div class="mb-1">
+                            <label class="form-label fw-semibold small">{% trans "Correo institucional" %}</label>
+                            <input type="email" name="est-email" class="form-control"
+                                   placeholder="nombre@universidad.edu.co" required
+                                   value="{{ form_estudiante.email.value|default:'' }}">
+                            {% if form_estudiante.email.errors %}
+                            <div class="text-danger small">{{ form_estudiante.email.errors.0 }}</div>
+                            {% endif %}
                         </div>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold small">Correo electrónico</label>
-                        <div class="input-group">
-                            <span class="input-group-text bg-light"><i class="fa-solid fa-envelope text-muted"></i></span>
-                            <input type="email" name="email" class="form-control" placeholder="correo@universidad.edu.co">
+                        <div class="text-muted mb-3" style="font-size:0.75rem">
+                            <i class="fa-solid fa-circle-info me-1 text-primary"></i>
+                            {% trans "Solo correos .edu o .edu.co son válidos" %}
                         </div>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold small">Contraseña</label>
-                        <input type="password" name="password1" class="form-control" placeholder="Mínimo 8 caracteres" required>
-                    </div>
-                    <div class="mb-4">
-                        <label class="form-label fw-semibold small">Confirmar contraseña</label>
-                        <input type="password" name="password2" class="form-control" placeholder="Repite tu contraseña" required>
-                    </div>
-                    <button type="submit" class="btn btn-primary w-100 fw-semibold">
-                        <i class="fa-solid fa-user-plus me-2"></i>Crear cuenta
-                    </button>
-                </form>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold small">{% trans "Institución" %}</label>
+                            <select name="est-institucion" class="form-select" required>
+                                <option value="">-- {% trans "Selecciona tu institución" %} --</option>
+                                {% for inst in form_estudiante.fields.institucion.choices %}
+                                {% if inst.0 %}
+                                <option value="{{ inst.0 }}"
+                                    {% if form_estudiante.institucion.value == inst.0 %}selected{% endif %}>
+                                    {{ inst.1 }}
+                                </option>
+                                {% endif %}
+                                {% endfor %}
+                            </select>
+                            {% if form_estudiante.institucion.errors %}
+                            <div class="text-danger small">{{ form_estudiante.institucion.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="row g-3 mb-3">
+                            <div class="col-6">
+                                <label class="form-label fw-semibold small">{% trans "Código estudiantil" %}</label>
+                                <input type="text" name="est-codigo_estudiantil" class="form-control"
+                                       placeholder="2024-12345" required
+                                       value="{{ form_estudiante.codigo_estudiantil.value|default:'' }}">
+                                {% if form_estudiante.codigo_estudiantil.errors %}
+                                <div class="text-danger small">{{ form_estudiante.codigo_estudiantil.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label fw-semibold small">{% trans "Teléfono" %} <span class="text-muted">({% trans "opcional" %})</span></label>
+                                <input type="tel" name="est-telefono" class="form-control"
+                                       placeholder="+57 300 000 0000"
+                                       value="{{ form_estudiante.telefono.value|default:'' }}">
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold small">{% trans "Contraseña" %}</label>
+                            <input type="password" name="est-password1" class="form-control"
+                                   placeholder="{% trans 'Mínimo 8 caracteres' %}" required>
+                            {% if form_estudiante.password1.errors %}
+                            <div class="text-danger small">{{ form_estudiante.password1.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label fw-semibold small">{% trans "Confirmar contraseña" %}</label>
+                            <input type="password" name="est-password2" class="form-control"
+                                   placeholder="{% trans 'Repite tu contraseña' %}" required>
+                            {% if form_estudiante.password2.errors %}
+                            <div class="text-danger small">{{ form_estudiante.password2.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100 fw-semibold">
+                            <i class="fa-solid fa-graduation-cap me-2"></i>{% trans "Crear cuenta de estudiante" %}
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- ===== FORMULARIO ARRENDADOR ===== -->
+            <div x-show="userType === 'arrendador'" x-transition>
+                <div class="card border-0 shadow-sm rounded-4 p-4">
+                    {% if form_arrendador.non_field_errors %}
+                    <div class="alert alert-danger small">{{ form_arrendador.non_field_errors }}</div>
+                    {% endif %}
+
+                    <form method="post">
+                        {% csrf_token %}
+                        <input type="hidden" name="user_type" value="arrendador">
+
+                        <div class="row g-3 mb-3">
+                            <div class="col-6">
+                                <label class="form-label fw-semibold small">{% trans "Nombre" %}</label>
+                                <input type="text" name="arr-first_name" class="form-control"
+                                       placeholder="Juan" required
+                                       value="{{ form_arrendador.first_name.value|default:'' }}">
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label fw-semibold small">{% trans "Apellido" %}</label>
+                                <input type="text" name="arr-last_name" class="form-control"
+                                       placeholder="Pérez"
+                                       value="{{ form_arrendador.last_name.value|default:'' }}">
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold small">{% trans "Usuario" %}</label>
+                            <input type="text" name="arr-username" class="form-control"
+                                   placeholder="mi_usuario" required
+                                   value="{{ form_arrendador.username.value|default:'' }}">
+                            {% if form_arrendador.username.errors %}
+                            <div class="text-danger small">{{ form_arrendador.username.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold small">{% trans "Correo electrónico" %}</label>
+                            <input type="email" name="arr-email" class="form-control"
+                                   placeholder="correo@ejemplo.com" required
+                                   value="{{ form_arrendador.email.value|default:'' }}">
+                        </div>
+
+                        <div class="row g-3 mb-3">
+                            <div class="col-6">
+                                <label class="form-label fw-semibold small">{% trans "Teléfono" %}</label>
+                                <input type="tel" name="arr-telefono" class="form-control"
+                                       placeholder="+57 300 000 0000" required
+                                       value="{{ form_arrendador.telefono.value|default:'' }}">
+                                {% if form_arrendador.telefono.errors %}
+                                <div class="text-danger small">{{ form_arrendador.telefono.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label fw-semibold small">{% trans "Documento de identidad" %}</label>
+                                <input type="text" name="arr-documento_identidad" class="form-control"
+                                       placeholder="CC 1234567890"
+                                       value="{{ form_arrendador.documento_identidad.value|default:'' }}">
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold small">{% trans "Contraseña" %}</label>
+                            <input type="password" name="arr-password1" class="form-control"
+                                   placeholder="{% trans 'Mínimo 8 caracteres' %}" required>
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label fw-semibold small">{% trans "Confirmar contraseña" %}</label>
+                            <input type="password" name="arr-password2" class="form-control"
+                                   placeholder="{% trans 'Repite tu contraseña' %}" required>
+                            {% if form_arrendador.password2.errors %}
+                            <div class="text-danger small">{{ form_arrendador.password2.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100 fw-semibold">
+                            <i class="fa-solid fa-house-user me-2"></i>{% trans "Crear cuenta de arrendador" %}
+                        </button>
+                    </form>
+                </div>
             </div>
 
             <p class="text-center text-muted mt-3 small">
-                ¿Ya tienes cuenta?
-                <a href="{% url 'login' %}" class="text-primary fw-semibold text-decoration-none">Inicia sesión</a>
+                {% trans "¿Ya tienes cuenta?" %}
+                <a href="{% url 'login' %}" class="text-primary fw-semibold text-decoration-none">{% trans "Inicia sesión" %}</a>
             </p>
         </div>
     </div>

@@ -123,7 +123,54 @@ STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_DIRS = [BASE_DIR / 'static']
 
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
+
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+INSTITUCIONES_VALIDAS = [
+    # Colombia
+    'EAFIT', 'Universidad de Antioquia', 'UPB', 'Universidad Nacional de Colombia',
+    'Universidad de los Andes', 'Universidad del Rosario', 'Pontificia Universidad Javeriana',
+    'Universidad del Norte', 'ICESI', 'Universidad del Valle',
+    'Universidad Industrial de Santander', 'Universidad Tecnológica de Pereira',
+    'Universidad de Medellín', 'Universidad Pontificia Bolivariana', 'Universidad de La Sabana',
+    # Estados Unidos
+    'Harvard University', 'Stanford University', 'Massachusetts Institute of Technology',
+    'California Institute of Technology', 'Princeton University', 'Yale University',
+    'Columbia University', 'University of Chicago', 'University of Pennsylvania',
+    'Cornell University', 'Duke University', 'Northwestern University',
+    'Johns Hopkins University', 'Dartmouth College', 'Brown University',
+    'Vanderbilt University', 'Rice University', 'University of California Berkeley',
+    'University of California Los Angeles', 'University of Southern California',
+    'Carnegie Mellon University', 'Georgetown University', 'University of Michigan',
+    'New York University', 'University of Virginia',
+    # Reino Unido
+    'University of Oxford', 'University of Cambridge', 'Imperial College London',
+    'University College London', 'London School of Economics', 'University of Edinburgh',
+    'Kings College London', 'University of Manchester', 'University of Warwick',
+    'University of Bristol',
+    # Canadá
+    'University of Toronto', 'McGill University', 'University of British Columbia',
+    'University of Montreal', 'University of Alberta', 'McMaster University',
+    'University of Waterloo',
+    # Australia
+    'Australian National University', 'University of Melbourne', 'University of Sydney',
+    'University of New South Wales', 'University of Queensland', 'Monash University',
+    # Europa
+    'ETH Zurich', 'Technical University of Munich', 'University of Amsterdam',
+    'KU Leuven', 'Sorbonne University', 'Karolinska Institute', 'Uppsala University',
+    'University of Copenhagen',
+    # Asia
+    'National University of Singapore', 'Nanyang Technological University',
+    'Tsinghua University', 'Peking University', 'University of Tokyo', 'Kyoto University',
+    'Seoul National University', 'KAIST', 'Hong Kong University',
+    # América Latina
+    'Universidad de Buenos Aires', 'Pontificia Universidad Católica de Chile',
+    'Universidad de Chile', 'Tecnológico de Monterrey',
+    'Universidad Nacional Autónoma de México', 'Universidade de São Paulo',
+    'Universidad de Costa Rica',
+]
 
 
 # ── Django REST Framework ─────────────────────────────────────────────────────

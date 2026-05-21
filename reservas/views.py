@@ -1,3 +1,5 @@
+from functools import wraps
+
 from django.views.generic import FormView, TemplateView, ListView, DetailView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth import login, logout, authenticate
@@ -7,12 +9,41 @@ from django.shortcuts import redirect, get_object_or_404
 from django.urls import reverse_lazy
 from django.db.models import Sum, Q
 
-from .forms import ReservaForm
+from .forms import (
+    ReservaForm, RegistroEstudianteForm, RegistroArrendadorForm,
+    PublicarAlojamientoForm, CancelarReservaForm,
+)
 from .services import ReservaService
-from .models import Alojamiento, Casa, Apartamento, Reserva, Estudiante
+from .models import Alojamiento, Casa, Apartamento, Reserva, Estudiante, Arrendador, AlojamientoImagen
 
 
-# ── Landing ──────────────────────────────────────────────────────────────────
+# ── Decoradores ───────────────────────────────────────────────────────────────
+
+def estudiante_required(view_func):
+    @wraps(view_func)
+    def wrapper(request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return redirect('login')
+        if not hasattr(request.user, 'estudiante'):
+            messages.error(request, 'Solo estudiantes pueden acceder a esta sección.')
+            return redirect('dashboard')
+        return view_func(request, *args, **kwargs)
+    return wrapper
+
+
+def arrendador_required(view_func):
+    @wraps(view_func)
+    def wrapper(request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return redirect('login')
+        if not hasattr(request.user, 'arrendador'):
+            messages.error(request, 'Solo arrendadores pueden acceder a esta sección.')
+            return redirect('dashboard')
+        return view_func(request, *args, **kwargs)
+    return wrapper
+
+
+# ── Landing ───────────────────────────────────────────────────────────────────
 
 class LandingView(TemplateView):
     template_name = 'landing.html'
@@ -48,29 +79,73 @@ class LoginView(TemplateView):
 class RegisterView(TemplateView):
     template_name = 'auth/register.html'
 
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx['form_estudiante'] = RegistroEstudianteForm(prefix='est')
+        ctx['form_arrendador'] = RegistroArrendadorForm(prefix='arr')
+        return ctx
+
     def post(self, request):
-        username   = request.POST.get('username')
-        email      = request.POST.get('email')
-        password1  = request.POST.get('password1')
-        password2  = request.POST.get('password2')
-        first_name = request.POST.get('first_name', '')
-        last_name  = request.POST.get('last_name', '')
+        user_type = request.POST.get('user_type', 'estudiante')
 
-        if password1 != password2:
-            messages.error(request, 'Las contraseñas no coinciden.')
-            return self.get(request)
+        if user_type == 'estudiante':
+            form = RegistroEstudianteForm(request.POST, prefix='est')
+            if not form.is_valid():
+                ctx = self.get_context_data()
+                ctx['form_estudiante'] = form
+                ctx['user_type_selected'] = 'estudiante'
+                return self.render_to_response(ctx)
 
-        if User.objects.filter(username=username).exists():
-            messages.error(request, 'Ese nombre de usuario ya existe.')
-            return self.get(request)
+            data = form.cleaned_data
+            if User.objects.filter(username=data['username']).exists():
+                form.add_error('username', 'Ese nombre de usuario ya existe.')
+                ctx = self.get_context_data()
+                ctx['form_estudiante'] = form
+                ctx['user_type_selected'] = 'estudiante'
+                return self.render_to_response(ctx)
 
-        user = User.objects.create_user(
-            username=username, email=email,
-            password=password1,
-            first_name=first_name, last_name=last_name,
-        )
+            user = User.objects.create_user(
+                username=data['username'], email=data['email'],
+                password=data['password1'],
+                first_name=data['first_name'], last_name=data.get('last_name', ''),
+            )
+            Estudiante.objects.create(
+                user=user,
+                codigo_estudiantil=data['codigo_estudiantil'],
+                institucion=data['institucion'],
+                telefono=data.get('telefono', ''),
+                verificado=True,
+            )
+
+        else:  # arrendador
+            form = RegistroArrendadorForm(request.POST, prefix='arr')
+            if not form.is_valid():
+                ctx = self.get_context_data()
+                ctx['form_arrendador'] = form
+                ctx['user_type_selected'] = 'arrendador'
+                return self.render_to_response(ctx)
+
+            data = form.cleaned_data
+            if User.objects.filter(username=data['username']).exists():
+                form.add_error('username', 'Ese nombre de usuario ya existe.')
+                ctx = self.get_context_data()
+                ctx['form_arrendador'] = form
+                ctx['user_type_selected'] = 'arrendador'
+                return self.render_to_response(ctx)
+
+            user = User.objects.create_user(
+                username=data['username'], email=data['email'],
+                password=data['password1'],
+                first_name=data['first_name'], last_name=data.get('last_name', ''),
+            )
+            Arrendador.objects.create(
+                user=user,
+                telefono=data['telefono'],
+                documento_identidad=data.get('documento_identidad', ''),
+            )
+
         login(request, user)
-        messages.success(request, f'¡Bienvenido/a, {user.first_name or username}!')
+        messages.success(request, f'¡Bienvenido/a, {user.first_name or user.username}!')
         return redirect('dashboard')
 
 
@@ -80,38 +155,57 @@ class LogoutView(TemplateView):
         return redirect('landing')
 
 
-# ── Dashboard ─────────────────────────────────────────────────────────────────
+# ── Dashboard (router por rol) ────────────────────────────────────────────────
 
 class DashboardView(LoginRequiredMixin, TemplateView):
-    template_name = 'dashboard.html'
     login_url = 'login'
+
+    def get_template_names(self):
+        if hasattr(self.request.user, 'arrendador'):
+            return ['dashboard_arrendador.html']
+        return ['dashboard_estudiante.html']
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
         user = self.request.user
 
-        try:
-            estudiante = user.estudiante
-        except Estudiante.DoesNotExist:
-            estudiante = None
-
-        if estudiante:
-            reservas = Reserva.objects.filter(
-                estudiante=estudiante
-            ).select_related('alojamiento').order_by('-fecha_creacion')
+        if hasattr(user, 'arrendador'):
+            arrendador = user.arrendador
+            alojamientos = Alojamiento.objects.filter(arrendador=arrendador)
+            reservas_recibidas = Reserva.objects.filter(
+                alojamiento__arrendador=arrendador
+            ).select_related('estudiante__user', 'alojamiento').order_by('-fecha_creacion')
+            ctx.update({
+                'arrendador': arrendador,
+                'alojamientos': alojamientos,
+                'alojamientos_count': alojamientos.count(),
+                'alojamientos_disponibles': alojamientos.filter(disponible=True).count(),
+                'reservas_recibidas': reservas_recibidas,
+                'reservas_count': reservas_recibidas.count(),
+            })
         else:
-            reservas = Reserva.objects.none()
+            try:
+                estudiante = user.estudiante
+            except Estudiante.DoesNotExist:
+                estudiante = None
 
-        monto = reservas.aggregate(total=Sum('monto_total'))['total'] or 0
+            if estudiante:
+                reservas = Reserva.objects.filter(
+                    estudiante=estudiante
+                ).select_related('alojamiento').order_by('-fecha_creacion')
+            else:
+                reservas = Reserva.objects.none()
 
-        ctx.update({
-            'estudiante':          estudiante,
-            'reservas':            reservas,
-            'reservas_count':      reservas.count(),
-            'reservas_confirmadas': reservas.filter(estado='CONFIRMADA').count(),
-            'reservas_pendientes': reservas.filter(estado='PENDIENTE').count(),
-            'monto_total':         monto,
-        })
+            monto = reservas.aggregate(total=Sum('monto_total'))['total'] or 0
+            ctx.update({
+                'estudiante': estudiante,
+                'reservas': reservas,
+                'reservas_count': reservas.count(),
+                'reservas_confirmadas': reservas.filter(estado='CONFIRMADA').count(),
+                'reservas_pendientes': reservas.filter(estado='PENDIENTE').count(),
+                'monto_total': monto,
+            })
+
         return ctx
 
 
@@ -166,60 +260,238 @@ class DetalleAlojamientoView(TemplateView):
             aloj = aloj.casa
             tipo = 'Casa'
         except Casa.DoesNotExist:
-            pass
-        else:
-            ctx['alojamiento'] = aloj
-            ctx['tipo'] = tipo
-            return ctx
+            try:
+                aloj = aloj.apartamento
+                tipo = 'Apartamento'
+            except Apartamento.DoesNotExist:
+                tipo = 'Alojamiento'
 
-        try:
-            aloj = aloj.apartamento
-            tipo = 'Apartamento'
-        except Apartamento.DoesNotExist:
-            tipo = 'Alojamiento'
-
+        es_estudiante = (
+            self.request.user.is_authenticated
+            and hasattr(self.request.user, 'estudiante')
+        )
         ctx['alojamiento'] = aloj
         ctx['tipo'] = tipo
+        ctx['es_estudiante'] = es_estudiante
+        ctx['imagenes'] = aloj.imagenes.all()
         return ctx
 
 
-# ── Crear reserva (wizard) ────────────────────────────────────────────────────
+# ── Crear reserva ─────────────────────────────────────────────────────────────
 
-class CrearReservaView(LoginRequiredMixin, FormView):
+class CrearReservaView(LoginRequiredMixin, TemplateView):
     template_name = 'reservas/crear.html'
-    form_class    = ReservaForm
-    success_url   = reverse_lazy('dashboard')
-    login_url     = 'login'
+    login_url = 'login'
 
-    def get_form(self, form_class=None):
-        form = super().get_form(form_class)
-        for field in form.fields.values():
-            widget = field.widget
-            existing = widget.attrs.get('class', '')
-            if hasattr(widget, 'input_type') and widget.input_type == 'select':
-                widget.attrs['class'] = f'{existing} form-select'.strip()
-            else:
-                widget.attrs['class'] = f'{existing} form-control'.strip()
-        return form
+    def dispatch(self, request, *args, **kwargs):
+        if request.user.is_authenticated and not hasattr(request.user, 'estudiante'):
+            messages.error(request, 'Solo estudiantes pueden crear reservas.')
+            return redirect('dashboard')
+        return super().dispatch(request, *args, **kwargs)
 
-    def form_valid(self, form):
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        alojamiento_id = self.request.GET.get('alojamiento')
+        alojamiento_preseleccionado = None
+        if alojamiento_id:
+            try:
+                alojamiento_preseleccionado = Alojamiento.objects.get(pk=alojamiento_id, disponible=True)
+            except Alojamiento.DoesNotExist:
+                pass
+
+        ctx['form'] = ReservaForm(initial={'alojamiento': alojamiento_id} if alojamiento_id else {})
+        ctx['alojamiento_preseleccionado'] = alojamiento_preseleccionado
+        ctx['estudiante'] = self.request.user.estudiante
+        return ctx
+
+    def post(self, request, *args, **kwargs):
+        form = ReservaForm(request.POST)
+        if not form.is_valid():
+            ctx = self.get_context_data()
+            ctx['form'] = form
+            return self.render_to_response(ctx)
+
         service = ReservaService()
         try:
             reserva = service.crear_reserva(
-                estudiante   = form.cleaned_data['estudiante'],
+                estudiante   = request.user.estudiante,
                 alojamiento  = form.cleaned_data['alojamiento'],
                 fecha_inicio = form.cleaned_data['fecha_inicio'],
                 fecha_fin    = form.cleaned_data['fecha_fin'],
             )
-            messages.success(self.request, f'¡Reserva #{reserva.id} confirmada con éxito!')
+            messages.success(
+                request,
+                f'¡Reserva #{reserva.id} confirmada! Total: ${reserva.monto_total:,.0f} COP'
+            )
         except Exception as e:
-            messages.error(self.request, f'Error al crear la reserva: {e}')
-            return self.form_invalid(form)
-        return super().form_valid(form)
+            messages.error(request, f'Error al crear la reserva: {e}')
+            ctx = self.get_context_data()
+            ctx['form'] = form
+            return self.render_to_response(ctx)
+        return redirect('dashboard')
 
-    def form_invalid(self, form):
-        messages.error(self.request, 'Por favor corrige los errores del formulario.')
-        return super().form_invalid(form)
+
+# ── Cancelar reserva ──────────────────────────────────────────────────────────
+
+class CancelarReservaView(LoginRequiredMixin, TemplateView):
+    template_name = 'reservas/cancelar.html'
+    login_url = 'login'
+
+    def _get_reserva_y_rol(self, request, pk):
+        reserva = get_object_or_404(Reserva, pk=pk)
+        es_arrendador = (
+            hasattr(request.user, 'arrendador')
+            and reserva.alojamiento.arrendador == request.user.arrendador
+        )
+        es_estudiante = (
+            hasattr(request.user, 'estudiante')
+            and reserva.estudiante == request.user.estudiante
+        )
+        return reserva, es_arrendador, es_estudiante
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        reserva, es_arrendador, es_estudiante = self._get_reserva_y_rol(
+            self.request, kwargs['pk']
+        )
+        if not (es_arrendador or es_estudiante):
+            return ctx
+        ctx['reserva'] = reserva
+        ctx['form'] = CancelarReservaForm()
+        return ctx
+
+    def post(self, request, *args, **kwargs):
+        reserva, es_arrendador, es_estudiante = self._get_reserva_y_rol(request, kwargs['pk'])
+        if not (es_arrendador or es_estudiante):
+            messages.error(request, 'No tienes permiso para cancelar esta reserva.')
+            return redirect('dashboard')
+
+        if not reserva.puede_cancelarse():
+            messages.error(request, 'Esta reserva no puede cancelarse (ya está activa o cancelada).')
+            return redirect('dashboard')
+
+        form = CancelarReservaForm(request.POST)
+        if not form.is_valid():
+            ctx = {'reserva': reserva, 'form': form}
+            return self.render_to_response(ctx)
+
+        reserva.estado = 'CANCELADA'
+        reserva.motivo_cancelacion = form.cleaned_data['motivo']
+        reserva.cancelada_por = 'arrendador' if es_arrendador else 'estudiante'
+        reserva.save(update_fields=['estado', 'motivo_cancelacion', 'cancelada_por'])
+
+        # Liberar el alojamiento
+        aloj = reserva.alojamiento
+        aloj.disponible = True
+        aloj.save(update_fields=['disponible'])
+
+        messages.success(request, f'Reserva #{reserva.id} cancelada correctamente.')
+        return redirect('dashboard')
+
+
+# ── Renovar reserva ───────────────────────────────────────────────────────────
+
+class RenovarReservaView(LoginRequiredMixin, TemplateView):
+    login_url = 'login'
+
+    def post(self, request, pk, *args, **kwargs):
+        reserva = get_object_or_404(
+            Reserva, pk=pk, estudiante=request.user.estudiante
+        )
+
+        if not reserva.esta_por_vencer():
+            messages.error(request, 'Solo puedes renovar reservas que estén por vencer (≤ 7 días).')
+            return redirect('dashboard')
+
+        duracion = (reserva.fecha_fin - reserva.fecha_inicio).days
+        nueva_inicio = reserva.fecha_fin
+        from datetime import timedelta
+        nueva_fin = nueva_inicio + timedelta(days=duracion)
+
+        service = ReservaService()
+        try:
+            nueva = service.crear_reserva(
+                estudiante   = request.user.estudiante,
+                alojamiento  = reserva.alojamiento,
+                fecha_inicio = nueva_inicio,
+                fecha_fin    = nueva_fin,
+            )
+            nueva.renovacion_de = reserva
+            nueva.save(update_fields=['renovacion_de'])
+            messages.success(request, f'Contrato renovado. Nueva reserva #{nueva.id} creada.')
+        except Exception as e:
+            messages.error(request, f'No se pudo renovar: {e}')
+
+        return redirect('dashboard')
+
+
+# ── Publicar alojamiento ──────────────────────────────────────────────────────
+
+class PublicarAlojamientoView(LoginRequiredMixin, TemplateView):
+    template_name = 'alojamientos/publicar.html'
+    login_url = 'login'
+
+    def dispatch(self, request, *args, **kwargs):
+        if request.user.is_authenticated and not hasattr(request.user, 'arrendador'):
+            messages.error(request, 'Solo arrendadores pueden publicar alojamientos.')
+            return redirect('dashboard')
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx['form'] = PublicarAlojamientoForm()
+        return ctx
+
+    def post(self, request, *args, **kwargs):
+        form = PublicarAlojamientoForm(request.POST)
+        if not form.is_valid():
+            return self.render_to_response({'form': form})
+
+        d = form.cleaned_data
+        tipo = d['tipo']
+        arrendador = request.user.arrendador
+
+        base_kwargs = dict(
+            arrendador=arrendador,
+            nombre=d['nombre'],
+            direccion=d['direccion'],
+            ciudad=d['ciudad'],
+            precio_mensual=d['precio_mensual'],
+            descripcion_completa=d.get('descripcion_completa', ''),
+            latitud=d.get('latitud'),
+            longitud=d.get('longitud'),
+            disponible=True,
+        )
+
+        if tipo == 'casa':
+            alojamiento = Casa.objects.create(
+                **base_kwargs,
+                numero_pisos=d.get('numero_pisos') or 1,
+                tiene_patio=d.get('tiene_patio', False),
+                tiene_garaje=d.get('tiene_garaje', False),
+            )
+        elif tipo == 'apartamento':
+            alojamiento = Apartamento.objects.create(
+                **base_kwargs,
+                numero_piso=d.get('numero_piso') or 1,
+                tiene_ascensor=d.get('tiene_ascensor', False),
+                tiene_porteria=d.get('tiene_porteria', False),
+            )
+        else:
+            alojamiento = Alojamiento.objects.create(**base_kwargs)
+
+        # Guardar imágenes subidas
+        imagenes = request.FILES.getlist('imagenes')
+        for i, img_file in enumerate(imagenes):
+            AlojamientoImagen.objects.create(
+                alojamiento=alojamiento,
+                imagen=img_file,
+                orden=i,
+                es_principal=(i == 0),
+            )
+
+        messages.success(request, f'Alojamiento "{alojamiento.nombre}" publicado exitosamente.')
+        return redirect('dashboard')
 
 
 # ── Helpers ───────────────────────────────────────────────────────────────────

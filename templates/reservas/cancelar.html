@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Cancelar reserva" %}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5">
+            <div class="text-center mb-4">
+                <i class="fa-solid fa-ban text-danger" style="font-size: 2.5rem;"></i>
+                <h3 class="fw-bold mt-3">{% trans "Cancelar reserva" %} #{{ reserva.id }}</h3>
+                <p class="text-muted">
+                    {{ reserva.alojamiento.nombre }} &middot;
+                    {{ reserva.fecha_inicio|date:"d M Y" }} → {{ reserva.fecha_fin|date:"d M Y" }}
+                </p>
+            </div>
+
+            <div class="card border-0 shadow-sm rounded-4 p-4">
+                {% if not reserva.puede_cancelarse %}
+                <div class="alert alert-warning">
+                    <i class="fa-solid fa-triangle-exclamation me-2"></i>
+                    {% trans "Esta reserva no puede cancelarse porque ya está activa o cancelada." %}
+                </div>
+                <a href="{% url 'dashboard' %}" class="btn btn-secondary w-100">
+                    <i class="fa-solid fa-arrow-left me-2"></i>{% trans "Volver al panel" %}
+                </a>
+                {% else %}
+                <div class="alert alert-warning small">
+                    <i class="fa-solid fa-triangle-exclamation me-2"></i>
+                    {% trans "Esta acción no se puede deshacer. El alojamiento quedará disponible nuevamente." %}
+                </div>
+
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold">{% trans "Motivo de cancelación" %} <span class="text-danger">*</span></label>
+                        <textarea name="motivo" class="form-control" rows="4"
+                                  placeholder="{% trans 'Describe el motivo de cancelación (mínimo 10 caracteres)...' %}"
+                                  required minlength="10">{{ form.motivo.value|default:'' }}</textarea>
+                        {% if form.motivo.errors %}
+                        <div class="text-danger small mt-1">{{ form.motivo.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-danger fw-semibold">
+                            <i class="fa-solid fa-ban me-2"></i>{% trans "Confirmar cancelación" %}
+                        </button>
+                        <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary">
+                            <i class="fa-solid fa-arrow-left me-2"></i>{% trans "Volver sin cancelar" %}
+                        </a>
+                    </div>
+                </form>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
