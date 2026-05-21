@@ -5,8 +5,8 @@ import requests
 from django.db import transaction
 from django.core.exceptions import ValidationError
 
-from .domain.builders import ReservaBuilder
-from .infra.factories import NotificadorFactory
+from domain.builders import ReservaBuilder
+from infra.factories import NotificadorFactory
 
 logger = logging.getLogger(__name__)
 
