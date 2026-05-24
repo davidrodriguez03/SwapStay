@@ -304,7 +304,7 @@ class CrearReservaView(LoginRequiredMixin, TemplateView):
             except Alojamiento.DoesNotExist:
                 pass
 
-            precios = {
+        precios = {
             str(a.pk): float(a.precio_mensual)
             for a in Alojamiento.objects.filter(disponible=True)
             }
