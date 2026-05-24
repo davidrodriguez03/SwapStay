@@ -51,12 +51,16 @@ class LandingView(TemplateView):
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
+
         ctx['alojamientos_destacados'] = _alojamientos_con_tipo(
-            Alojamiento.objects.filter(disponible=True)[:6]
+            Alojamiento.objects.filter(disponible=True)
+            .prefetch_related('imagenes')[:6]
         )
+
         ctx['total_alojamientos'] = Alojamiento.objects.count()
         ctx['total_estudiantes']  = Estudiante.objects.count()
         ctx['total_ciudades']     = Alojamiento.objects.values('ciudad').distinct().count()
+
         return ctx
 
 

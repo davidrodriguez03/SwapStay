@@ -20,6 +20,11 @@ ALLOWED_HOSTS = os.environ.get(
     'localhost,127.0.0.1,django,nginx'
 ).split(',')
 
+CSRF_TRUSTED_ORIGINS = [
+    f'http://{h}' for h in os.environ.get(
+        'ALLOWED_HOSTS', 'localhost,127.0.0.1'
+    ).split(',') if h and h not in ('localhost', '127.0.0.1', 'django', 'nginx')
+] + ['http://localhost', 'http://127.0.0.1']
 
 INSTALLED_APPS = [
     'django.contrib.admin',

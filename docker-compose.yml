@@ -46,15 +46,21 @@ services:
     container_name: swapstay_django
     working_dir: /app
     restart: unless-stopped
+
+    # ✅ FIX Bug 3: compilemessages agregado antes de gunicorn
     command: >
       sh -c "python manage.py migrate &&
              python manage.py collectstatic --noinput &&
+             python manage.py compilemessages &&
              gunicorn config.wsgi:application --bind 0.0.0.0:8000 --workers 4"
+
     volumes:
       - ./:/app
       - static_volume:/app/staticfiles
+
     env_file:
       - .env
+
     environment:
       ENV_TYPE: development
       DB_ENGINE: postgres
@@ -67,11 +73,13 @@ services:
       CELERY_RESULT_BACKEND: redis://redis:6379/0
       NOTIFICACIONES_SERVICE_URL: http://flask-notificaciones:5002
       MONEDA_SERVICE_URL: http://flask-moneda:5005
+
     depends_on:
       db:
         condition: service_healthy
       redis:
         condition: service_healthy
+
     networks:
       - swapstay_network
 
@@ -83,8 +91,10 @@ services:
     container_name: swapstay_celery_worker
     restart: unless-stopped
     command: celery -A config worker --loglevel=info --concurrency=2
+
     volumes:
       - ./:/app
+
     environment:
       ENV_TYPE: development
       DB_ENGINE: postgres
@@ -97,11 +107,13 @@ services:
       CELERY_RESULT_BACKEND: redis://redis:6379/0
       NOTIFICACIONES_SERVICE_URL: http://flask-notificaciones:5002
       MONEDA_SERVICE_URL: http://flask-moneda:5005
+
     depends_on:
       db:
         condition: service_healthy
       redis:
         condition: service_healthy
+
     networks:
       - swapstay_network
 
@@ -112,9 +124,12 @@ services:
       dockerfile: Dockerfile
     container_name: swapstay_celery_beat
     restart: unless-stopped
+
     command: celery -A config beat --loglevel=info --scheduler django_celery_beat.schedulers:DatabaseScheduler
+
     volumes:
       - ./:/app
+
     environment:
       ENV_TYPE: development
       DB_ENGINE: postgres
@@ -126,6 +141,7 @@ services:
       CELERY_BROKER_URL: redis://redis:6379/0
       CELERY_RESULT_BACKEND: redis://redis:6379/0
       MONEDA_SERVICE_URL: http://flask-moneda:5005
+
     depends_on:
       db:
         condition: service_healthy
@@ -133,6 +149,7 @@ services:
         condition: service_healthy
       celery_worker:
         condition: service_started
+
     networks:
       - swapstay_network
 
@@ -143,10 +160,13 @@ services:
       dockerfile: Dockerfile
     container_name: swapstay_flask_cotizaciones
     restart: unless-stopped
+
     environment:
       FLASK_ENV: production
+
     expose:
       - "5000"
+
     networks:
       - swapstay_network
 
@@ -157,12 +177,15 @@ services:
       dockerfile: Dockerfile
     container_name: swapstay_flask_notificaciones
     restart: unless-stopped
+
     environment:
       FLASK_ENV: production
       SENDGRID_API_KEY: ${SENDGRID_API_KEY:-}
       SENDGRID_FROM_EMAIL: ${SENDGRID_FROM_EMAIL:-noreply@swapstay.com}
+
     expose:
       - "5002"
+
     networks:
       - swapstay_network
 
@@ -173,17 +196,21 @@ services:
       dockerfile: Dockerfile
     container_name: swapstay_flask_disponibilidad
     restart: unless-stopped
+
     environment:
       DB_HOST: db
       DB_PORT: 5432
       DB_NAME: swapstay
       DB_USER: swapstay
       DB_PASSWORD: swapstay
+
     expose:
       - "5003"
+
     depends_on:
       db:
         condition: service_healthy
+
     networks:
       - swapstay_network
 
@@ -194,10 +221,13 @@ services:
       dockerfile: Dockerfile
     container_name: swapstay_flask_validaciones
     restart: unless-stopped
+
     environment:
       FLASK_ENV: production
+
     expose:
       - "5004"
+
     networks:
       - swapstay_network
 
@@ -208,10 +238,13 @@ services:
       dockerfile: Dockerfile
     container_name: swapstay_flask_moneda
     restart: unless-stopped
+
     environment:
       FLASK_ENV: production
+
     expose:
       - "5005"
+
     networks:
       - swapstay_network
 
@@ -222,10 +255,13 @@ services:
       dockerfile: Dockerfile
     container_name: swapstay_flask_geolocalizacion
     restart: unless-stopped
+
     environment:
       FLASK_ENV: production
+
     expose:
       - "5006"
+
     networks:
       - swapstay_network
 
@@ -234,11 +270,14 @@ services:
     image: nginx:1.27-alpine
     container_name: swapstay_nginx
     restart: unless-stopped
+
     ports:
       - "80:80"
+
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - static_volume:/app/staticfiles:ro
+
     depends_on:
       - django
       - flask
@@ -247,6 +286,7 @@ services:
       - flask-validaciones
       - flask-moneda
       - flask-geolocalizacion
+
     networks:
       - swapstay_network
 
