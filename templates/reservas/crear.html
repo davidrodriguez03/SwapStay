@@ -102,7 +102,14 @@
                         {% else %}
                         <div class="mb-2">
                             <label class="form-label fw-semibold">{% trans "Alojamiento disponible" %}</label>
-                            {{ form.alojamiento }}
+			    <select name="alojamiento" class="form-select" required>
+				<option value="">-- Selecciona un alojamiento --</option>
+				{% for a in alojamientos_disponibles %}
+				<option value="{{ a.pk }}" data-precio="{{ a.precio_mensual }}">
+				    {{ a.nombre }} — {{ a.ciudad }}
+				</option>
+				{% endfor %}
+			    </select>
                             {% if form.alojamiento.errors %}
                             <div class="invalid-feedback d-block">{{ form.alojamiento.errors.0 }}</div>
                             {% endif %}
@@ -276,12 +283,27 @@ function wizard({ precioMensual }) {
 
             document.querySelector('[name="fecha_inicio"]')?.addEventListener('change', () => this.calcularDias());
             document.querySelector('[name="fecha_fin"]')?.addEventListener('change', () => this.calcularDias());
+	    const fi = document.querySelector('[name="fecha_inicio"]');
+	    const ff = document.querySelector('[name="fecha_fin"]');
+	    if (fi?.value && ff?.value) this.calcularDias();
         },
 
         irPaso(n) {
-            if (n === 3) this.actualizarResumen();
-            this.paso = n;
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            if (n === 3) {
+		const fi = document.querySelector('[name="fecha_inicio"]')?.value;
+		const ff = document.querySelector('[name="fecha_fin"]')?.value;
+		if (!fi || !ff) {
+		    alert('Por favor selecciona las fechas de entrada y salida.');
+	            return;
+		}
+		if (this.diasEstadia < 30) {
+		    alert('La estadía mínima es de 30 días.');
+		    return;
+		}
+		this.actualizarResumen();
+	   }
+           this.paso = n;
+           window.scrollTo({ top: 0, behavior: 'smooth' });
         },
 
         calcularDias() {
@@ -294,7 +316,7 @@ function wizard({ precioMensual }) {
             this.fechaInicioStr = fi;
             this.fechaFinStr = ff;
 
-            const precio = precioMensual || this._getPrecioDelSelect();
+            const precio = precioMensual > 0 ? precioMensual : this._getPrecioDelSelect();
             this.costoEstimadoCOP = Math.round(precio * dias / 30);
             this.costoEstimadoUSD = (this.costoEstimadoCOP / this.tasa).toLocaleString('en-US', {
                 minimumFractionDigits: 2, maximumFractionDigits: 2
@@ -303,9 +325,8 @@ function wizard({ precioMensual }) {
 
         _getPrecioDelSelect() {
             const sel = document.querySelector('[name="alojamiento"]');
-            const texto = sel?.selectedOptions[0]?.text || '';
-            const match = texto.match(/[\d.,]+/);
-            return match ? parseFloat(match[0].replace(/[.,]/g, '')) : 1500000;
+	    const dp = sel?.selectedOptions[0]?.getAttribute('data-precio');
+	    return dp ? parseFloat(dp) : 0;
         },
 
         actualizarResumen() {

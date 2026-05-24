@@ -80,7 +80,6 @@ class LoginView(TemplateView):
         messages.error(request, 'Usuario o contraseña incorrectos.')
         return self.get(request)
 
-
 class RegisterView(TemplateView):
     template_name = 'auth/register.html'
 
@@ -307,6 +306,7 @@ class CrearReservaView(LoginRequiredMixin, TemplateView):
         ctx['form'] = ReservaForm(initial={'alojamiento': alojamiento_id} if alojamiento_id else {})
         ctx['alojamiento_preseleccionado'] = alojamiento_preseleccionado
         ctx['estudiante'] = self.request.user.estudiante
+        ctx['alojamientos_disponibles'] = Alojamiento.objects.filter(disponible=True)
         return ctx
 
     def post(self, request, *args, **kwargs):

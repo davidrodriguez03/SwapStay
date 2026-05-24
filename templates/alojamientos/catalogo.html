@@ -28,7 +28,7 @@
 
             <!-- Sidebar filtros -->
             <div class="col-lg-3">
-                <div class="card border-0 shadow-sm rounded-4 sticky-top" style="top: 80px;">
+                <div class="card border-0 shadow-sm rounded-4 sticky-top" style="top: 70px; max-height: calc(100vh - 80px); overflow-y: auto;">
                     <div class="card-header bg-white border-0 pt-4 px-4 pb-2">
                         <h6 class="fw-bold mb-0">
                             <i class="fa-solid fa-sliders me-2 text-primary"></i>Filtros
@@ -74,14 +74,16 @@
 
                             <div class="mb-4">
                                 <label class="form-label small fw-semibold text-muted text-uppercase">
-                                    Precio máximo
-                                    <span class="text-primary fw-bold" x-text="'$' + precioMax.toLocaleString('es-CO')"></span>
+                                    Precio máximo:
+                                    <span class="text-primary fw-bold" id="precio-label">
+					${{ request.GET.precio_max|default:'5000000'|floatformat:0 }}
+				    </span>
                                 </label>
                                 <input type="range" class="form-range" name="precio_max"
+				       id="precio-slider"
                                        min="500000" max="5000000" step="100000"
-                                       :value="precioMax"
-                                       @input="precioMax = parseInt($event.target.value)"
-                                       value="{{ request.GET.precio_max|default:'5000000' }}">
+                                       value="{{ request.GET.precio_max|default:'5000000' }}"
+                                       oninput="actualizarPrecio(this.value)">
                                 <div class="d-flex justify-content-between small text-muted">
                                     <span>$500K</span>
                                     <span>$5M</span>
@@ -129,8 +131,9 @@
                         </span>
                         {% endif %}
                     </div>
-                    <select name="orden" class="form-select form-select-sm w-auto" onchange="this.form.submit()">
-                        <option>Ordenar por...</option>
+                    <select name="orden" class="form-select form-select-sm w-auto"
+					 onchange="aplicarOrden(this.value)">
+                        <option value="" {% if not request.GET.orden %}selected{% endif %}>Ordenar por...</option>
                         <option value="precio_asc" {% if request.GET.orden == 'precio_asc' %}selected{% endif %}>Precio: menor a mayor</option>
                         <option value="precio_desc" {% if request.GET.orden == 'precio_desc' %}selected{% endif %}>Precio: mayor a menor</option>
                     </select>
@@ -238,10 +241,22 @@
 
 {% block extra_js %}
 <script>
-function catalogo() {
-    return {
-        precioMax: {{ request.GET.precio_max|default:'5000000' }},
-    };
+function aplicarOrden(orden) {
+    const url = new URL(window.location.href);
+    if (orden) url.searchParams.set('orden', orden);
+    else url.searchParams.delete('orden');
+    window.location.href = url.toString();
 }
+
+function actualizarPrecio(val) {
+    const num = parseInt(val);
+    document.getElementById('precio-label').textContent =
+        '$' + num.toLocaleString('es-CO');
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    const slider = document.getElementById('precio-slider');
+    if (slider) actualizarPrecio(slider.value);
+});
 </script>
 {% endblock %}
