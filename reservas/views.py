@@ -304,9 +304,15 @@ class CrearReservaView(LoginRequiredMixin, TemplateView):
             except Alojamiento.DoesNotExist:
                 pass
 
+            precios = {
+            str(a.pk): float(a.precio_mensual)
+            for a in Alojamiento.objects.filter(disponible=True)
+            }
+
         ctx['form'] = ReservaForm(initial={'alojamiento': alojamiento_id} if alojamiento_id else {})
         ctx['alojamiento_preseleccionado'] = alojamiento_preseleccionado
         ctx['estudiante'] = self.request.user.estudiante
+        ctx['precios_json'] = precios
         return ctx
 
     def post(self, request, *args, **kwargs):
