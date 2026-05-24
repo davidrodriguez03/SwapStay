@@ -14,6 +14,7 @@ from .views import (
     editar_alojamiento,
     eliminar_alojamiento,
     eliminar_imagen_alojamiento,
+    AliadoDashboardView,
 )
 
 urlpatterns = [
@@ -31,4 +32,5 @@ urlpatterns = [
     path('alojamientos/<int:pk>/editar/',   editar_alojamiento,           name='editar_alojamiento'),
     path('alojamientos/<int:pk>/eliminar/', eliminar_alojamiento,         name='eliminar_alojamiento'),
     path('alojamientos/imagenes/<int:pk>/eliminar/', eliminar_imagen_alojamiento, name='eliminar_imagen'),
+    path('aliado/', AliadoDashboardView.as_view(), name='aliado_dashboard'),
 ]

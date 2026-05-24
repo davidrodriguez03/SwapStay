@@ -1,0 +1,144 @@
+{% load static %}
+{% extends "base.html" %}
+
+{% block title %}Servicios Aliado{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+
+  <!-- ── Encabezado ── -->
+  <div class="d-flex align-items-center justify-content-between flex-wrap gap-3 mb-4">
+    <div>
+      <h2 class="fw-bold mb-1">
+        <i class="fa-solid fa-handshake text-primary me-2"></i>Aurora Estudio — Servicios
+      </h2>
+      <p class="text-secondary mb-0 small">
+        Datos consumidos desde
+        <a href="{{ aliado_url }}" target="_blank" class="text-decoration-none">{{ aliado_url }}</a>
+      </p>
+    </div>
+    <a href="?refresh=1" class="btn btn-outline-secondary btn-sm rounded-pill">
+      <i class="fa-solid fa-rotate me-1"></i>Forzar nuevo GET
+    </a>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════════════════ -->
+  <!-- Sección 1 — Banner de estado del cache                                -->
+  <!-- ══════════════════════════════════════════════════════════════════════ -->
+  {% if cache_info.tiene_datos %}
+  <div class="alert alert-success rounded-4 d-flex align-items-center gap-3 shadow-sm mb-4" role="alert">
+    <i class="fa-solid fa-circle-check fs-4 flex-shrink-0"></i>
+    <div>
+      <strong>Cache activo</strong> —
+      {{ cache_info.total_servicios }} servicio{{ cache_info.total_servicios|pluralize }} en memoria.
+      {% if cache_info.fecha_obtencion %}
+        Obtenido el <strong>{{ cache_info.fecha_obtencion }}</strong>.
+      {% endif %}
+    </div>
+  </div>
+  {% else %}
+  <div class="alert alert-warning rounded-4 d-flex align-items-center gap-3 shadow-sm mb-4" role="alert">
+    <i class="fa-solid fa-triangle-exclamation fs-4 flex-shrink-0"></i>
+    <div>
+      <strong>Cache vacío</strong> — No se han cargado servicios todavía o el servicio aliado no respondió.
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- ══════════════════════════════════════════════════════════════════════ -->
+  <!-- Sección 2 — Grid de servicios                                         -->
+  <!-- ══════════════════════════════════════════════════════════════════════ -->
+  <h4 class="fw-semibold mb-3">
+    <i class="fa-solid fa-list-check text-primary me-2"></i>Catálogo de servicios
+  </h4>
+
+  {% if servicios %}
+  <div class="row g-4 mb-5">
+    {% for servicio in servicios %}
+    <div class="col-sm-6 col-lg-4">
+      <div class="card h-100 border-0 shadow-sm rounded-4">
+        <div class="card-body p-4">
+          <div class="d-flex align-items-start justify-content-between mb-2">
+            <h6 class="card-title fw-bold mb-0">{{ servicio.nombre }}</h6>
+            <span class="badge bg-primary rounded-pill ms-2 text-nowrap">{{ servicio.categoria }}</span>
+          </div>
+          <p class="card-text text-secondary small mb-3">{{ servicio.descripcion }}</p>
+          <div class="d-flex align-items-center justify-content-between mt-auto pt-2 border-top">
+            <span class="fw-semibold text-success">
+              <i class="fa-solid fa-tag me-1"></i>{{ servicio.precio }}
+            </span>
+            <span class="text-secondary small">
+              <i class="fa-regular fa-clock me-1"></i>{{ servicio.duracion }}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="text-center py-5 mb-5">
+    <i class="fa-solid fa-plug-circle-xmark fs-1 text-secondary opacity-50 mb-3 d-block"></i>
+    <p class="text-secondary">No se pudieron obtener servicios del aliado. Intenta recargar con el botón de arriba.</p>
+  </div>
+  {% endif %}
+
+  <!-- ══════════════════════════════════════════════════════════════════════ -->
+  <!-- Sección 3 — Consulta de disponibilidad                                -->
+  <!-- ══════════════════════════════════════════════════════════════════════ -->
+  <div class="card border-0 shadow-sm rounded-4">
+    <div class="card-body p-4">
+      <h4 class="fw-semibold mb-4">
+        <i class="fa-solid fa-calendar-days text-primary me-2"></i>Consultar disponibilidad
+      </h4>
+
+      <form method="get" action="" class="row g-3 align-items-end">
+        {% if request.GET.refresh %}<input type="hidden" name="refresh" value="{{ request.GET.refresh }}">{% endif %}
+        <div class="col-sm-5">
+          <label for="fecha" class="form-label fw-semibold small">Fecha</label>
+          <input type="date" id="fecha" name="fecha" class="form-control rounded-3"
+                 value="{{ fecha_consulta }}" required>
+        </div>
+        <div class="col-sm-4">
+          <label for="duracion" class="form-label fw-semibold small">Duración (horas)</label>
+          <input type="number" id="duracion" name="duracion_horas" class="form-control rounded-3"
+                 value="1.00" min="0.5" step="0.5" readonly>
+        </div>
+        <div class="col-sm-3">
+          <button type="submit" class="btn btn-primary w-100 rounded-3">
+            <i class="fa-solid fa-magnifying-glass me-1"></i>Consultar
+          </button>
+        </div>
+      </form>
+
+      {% if disponibilidad %}
+        <hr class="my-4">
+        <div>
+          <p class="fw-semibold mb-3">
+            Horarios disponibles para <strong>{{ disponibilidad.fecha }}</strong>
+            (duración: {{ disponibilidad.duracion_horas }} h):
+          </p>
+          {% if disponibilidad.horarios_disponibles %}
+          <div class="d-flex flex-wrap gap-2">
+            {% for horario in disponibilidad.horarios_disponibles %}
+            <span class="badge bg-success fs-6 rounded-pill px-3 py-2">
+              <i class="fa-regular fa-clock me-1"></i>{{ horario }}
+            </span>
+            {% endfor %}
+          </div>
+          {% else %}
+          <p class="text-secondary">No hay horarios disponibles para esta fecha.</p>
+          {% endif %}
+        </div>
+      {% elif request.GET.fecha %}
+        <div class="alert alert-warning rounded-3 mt-4 mb-0">
+          <i class="fa-solid fa-triangle-exclamation me-2"></i>
+          No se pudo obtener disponibilidad para esta fecha. El servicio aliado puede estar inactivo.
+        </div>
+      {% endif %}
+
+    </div>
+  </div>
+
+</div>
+{% endblock %}

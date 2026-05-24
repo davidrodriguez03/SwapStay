@@ -14,7 +14,9 @@ from .forms import (
     ReservaForm, RegistroEstudianteForm, RegistroArrendadorForm,
     PublicarAlojamientoForm, CancelarReservaForm,
 )
-from .services import ReservaService
+from datetime import date
+
+from .services import ReservaService, AuroraEstudioService
 from .models import Alojamiento, Casa, Apartamento, Reserva, Estudiante, Arrendador, AlojamientoImagen
 
 
@@ -594,6 +596,34 @@ def eliminar_imagen_alojamiento(request, pk):
             primera.save(update_fields=['es_principal'])
 
     return JsonResponse({'success': True})
+
+
+# ── Dashboard Aliado ──────────────────────────────────────────────────────────
+
+class AliadoDashboardView(TemplateView):
+    template_name = 'aliado_dashboard.html'
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+
+        if self.request.GET.get('refresh') == '1':
+            AuroraEstudioService.invalidar_cache()
+
+        fecha_consulta = self.request.GET.get('fecha') or date.today().isoformat()
+
+        servicios = AuroraEstudioService.obtener_servicios()
+        disponibilidad = {}
+        if self.request.GET.get('fecha'):
+            disponibilidad = AuroraEstudioService.obtener_disponibilidad(fecha_consulta)
+
+        ctx.update({
+            'servicios': servicios,
+            'cache_info': AuroraEstudioService.info_cache(),
+            'disponibilidad': disponibilidad,
+            'fecha_consulta': fecha_consulta,
+            'aliado_url': AuroraEstudioService.BASE_URL,
+        })
+        return ctx
 
 
 # ── Helpers ───────────────────────────────────────────────────────────────────

@@ -56,6 +56,61 @@ class ReservaService:
             )
 
 
+class AuroraEstudioService:
+    """Consume la API de Aurora Estudio con cache en memoria para servicios."""
+
+    BASE_URL = 'http://aurora-studio.ddns.net'
+    TIMEOUT = 5
+
+    _cache_servicios: list | None = None
+    _cache_fecha: str | None = None
+
+    @classmethod
+    def obtener_servicios(cls) -> list:
+        if cls._cache_servicios is not None:
+            return cls._cache_servicios
+        try:
+            resp = requests.get(f'{cls.BASE_URL}/api/v1/servicios/', timeout=cls.TIMEOUT)
+            resp.raise_for_status()
+            data = resp.json()
+            cls._cache_servicios = data if isinstance(data, list) else []
+            from datetime import datetime
+            cls._cache_fecha = datetime.now().strftime('%d/%m/%Y %H:%M:%S')
+        except Exception as exc:
+            logger.warning('[AuroraEstudioService] obtener_servicios falló: %s', exc)
+            cls._cache_servicios = []
+            from datetime import datetime
+            cls._cache_fecha = datetime.now().strftime('%d/%m/%Y %H:%M:%S')
+        return cls._cache_servicios
+
+    @classmethod
+    def obtener_disponibilidad(cls, fecha: str) -> dict:
+        try:
+            resp = requests.get(
+                f'{cls.BASE_URL}/api/v1/disponibilidad/',
+                params={'fecha': fecha, 'duracion_horas': '1.00'},
+                timeout=cls.TIMEOUT,
+            )
+            resp.raise_for_status()
+            return resp.json()
+        except Exception as exc:
+            logger.warning('[AuroraEstudioService] obtener_disponibilidad falló: %s', exc)
+            return {}
+
+    @classmethod
+    def info_cache(cls) -> dict:
+        return {
+            'total_servicios': len(cls._cache_servicios) if cls._cache_servicios is not None else 0,
+            'tiene_datos': cls._cache_servicios is not None,
+            'fecha_obtencion': cls._cache_fecha,
+        }
+
+    @classmethod
+    def invalidar_cache(cls) -> None:
+        cls._cache_servicios = None
+        cls._cache_fecha = None
+
+
 class EquipoAliadoService:
     """Consume la API del equipo aliado con fallback graceful.
 
