@@ -4,8 +4,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: SwapStay 2.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-05-19 00:00+0000\n"
-"PO-Revision-Date: 2026-05-19 00:00+0000\n"
+"POT-Creation-Date: 2026-05-24 00:00+0000\n"
+"PO-Revision-Date: 2026-05-24 00:00+0000\n"
 "Last-Translator: SwapStay Team\n"
 "Language: en\n"
 "Language-Team: English\n"
@@ -33,30 +33,118 @@ msgstr "Register"
 msgid "Logout"
 msgstr "Logout"
 
-# ── Landing ───────────────────────────────────────────────────────────────────
-msgid "Find your home abroad"
-msgstr "Find your home abroad"
+# ── Landing — Hero ────────────────────────────────────────────────────────────
+msgid "Student platform"
+msgstr "Student platform"
 
-msgid "Student housing for international students in Colombia"
-msgstr "Student housing for international students in Colombia"
+msgid "Your home away"
+msgstr "Your home away"
 
-msgid "Search"
-msgstr "Search"
+msgid "from home, with"
+msgstr "from home, with"
 
-msgid "City"
-msgstr "City"
+msgid "total trust"
+msgstr "total trust"
 
-msgid "Type"
-msgstr "Type"
+msgid "Find verified temporary housing for your university exchange. Houses and apartments with trusted landlords throughout Colombia."
+msgstr "Find verified temporary housing for your university exchange. Houses and apartments with trusted landlords throughout Colombia."
 
-msgid "Max price"
-msgstr "Max price"
+msgid "Explore listings"
+msgstr "Explore listings"
 
 msgid "How it works"
 msgstr "How it works"
 
+msgid "Listings"
+msgstr "Listings"
+
+msgid "Students"
+msgstr "Students"
+
+msgid "Cities"
+msgstr "Cities"
+
+# ── Landing — Search ──────────────────────────────────────────────────────────
+msgid "Find your housing"
+msgstr "Find your housing"
+
+msgid "City"
+msgstr "City"
+
+msgid "E.g.: Bogotá, Medellín, Cali..."
+msgstr "E.g.: Bogotá, Medellín, Cali..."
+
+msgid "Type"
+msgstr "Type"
+
+msgid "Any"
+msgstr "Any"
+
+msgid "House"
+msgstr "House"
+
+msgid "Apartment"
+msgstr "Apartment"
+
+msgid "Max price"
+msgstr "Max price"
+
+msgid "Search now"
+msgstr "Search now"
+
+# ── Landing — How it works ────────────────────────────────────────────────────
+msgid "Simple process"
+msgstr "Simple process"
+
+msgid "How does SwapStay work?"
+msgstr "How does SwapStay work?"
+
+msgid "Three steps to find your ideal housing"
+msgstr "Three steps to find your ideal housing"
+
+msgid "Browse our list of verified listings. Filter by city, price, and type."
+msgstr "Browse our list of verified listings. Filter by city, price, and type."
+
+msgid "Book"
+msgstr "Book"
+
+msgid "Select your exchange dates and create your reservation in minutes."
+msgstr "Select your exchange dates and create your reservation in minutes."
+
+msgid "Enjoy"
+msgstr "Enjoy"
+
+msgid "Receive immediate confirmation and get ready for your new temporary home."
+msgstr "Receive immediate confirmation and get ready for your new temporary home."
+
+# ── Landing — Featured ────────────────────────────────────────────────────────
+msgid "Available now"
+msgstr "Available now"
+
 msgid "Featured listings"
 msgstr "Featured listings"
+
+msgid "See all"
+msgstr "See all"
+
+msgid "View more"
+msgstr "View more"
+
+msgid "month"
+msgstr "month"
+
+# ── Landing — CTA ─────────────────────────────────────────────────────────────
+msgid "Ready for your exchange?"
+msgstr "Ready for your exchange?"
+
+msgid "Join students who already found their home with SwapStay"
+msgstr "Join students who already found their home with SwapStay"
+
+msgid "Create free account"
+msgstr "Create free account"
+
+msgid "View listings"
+msgstr "View listings"
 
 # ── Listings ──────────────────────────────────────────────────────────────────
 msgid "Available"
@@ -64,12 +152,6 @@ msgstr "Available"
 
 msgid "Not available"
 msgstr "Not available"
-
-msgid "House"
-msgstr "House"
-
-msgid "Apartment"
-msgstr "Apartment"
 
 msgid "Monthly price"
 msgstr "Monthly price"
@@ -82,6 +164,40 @@ msgstr "Book now"
 
 msgid "View details"
 msgstr "View details"
+
+# ── Catalog ───────────────────────────────────────────────────────────────────
+msgid "Sort by..."
+msgstr "Sort by..."
+
+msgid "Price: low to high"
+msgstr "Price: low to high"
+
+msgid "Price: high to low"
+msgstr "Price: high to low"
+
+msgid "Only available"
+msgstr "Only available"
+
+msgid "Show only available"
+msgstr "Show only available"
+
+msgid "Apply filters"
+msgstr "Apply filters"
+
+msgid "Clear"
+msgstr "Clear"
+
+msgid "Filters"
+msgstr "Filters"
+
+msgid "No listings found"
+msgstr "No listings found"
+
+msgid "Try other filters or explore all options"
+msgstr "Try other filters or explore all options"
+
+msgid "See all listings"
+msgstr "See all listings"
 
 # ── Reservations ──────────────────────────────────────────────────────────────
 msgid "Create reservation"
@@ -111,15 +227,18 @@ msgstr "Pending"
 msgid "Cancelled"
 msgstr "Cancelled"
 
-# ── Dashboard ─────────────────────────────────────────────────────────────────
 msgid "My reservations"
 msgstr "My reservations"
 
+# ── Dashboard ─────────────────────────────────────────────────────────────────
 msgid "Total reservations"
 msgstr "Total reservations"
 
 msgid "Currency converter"
 msgstr "Currency converter"
+
+msgid "Hi"
+msgstr "Hi"
 
 # ── Authentication ────────────────────────────────────────────────────────────
 msgid "Username"

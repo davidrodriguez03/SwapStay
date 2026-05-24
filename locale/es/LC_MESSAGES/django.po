@@ -4,8 +4,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: SwapStay 2.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-05-19 00:00+0000\n"
-"PO-Revision-Date: 2026-05-19 00:00+0000\n"
+"POT-Creation-Date: 2026-05-24 00:00+0000\n"
+"PO-Revision-Date: 2026-05-24 00:00+0000\n"
 "Last-Translator: SwapStay Team\n"
 "Language: es\n"
 "Language-Team: Spanish\n"
@@ -33,30 +33,118 @@ msgstr "Registrarse"
 msgid "Logout"
 msgstr "Cerrar sesión"
 
-# ── Landing ───────────────────────────────────────────────────────────────────
-msgid "Find your home abroad"
-msgstr "Encuentra tu hogar en el exterior"
+# ── Landing — Hero ────────────────────────────────────────────────────────────
+msgid "Student platform"
+msgstr "Plataforma para estudiantes"
 
-msgid "Student housing for international students in Colombia"
-msgstr "Alojamiento estudiantil para estudiantes internacionales en Colombia"
+msgid "Your home away"
+msgstr "Tu hogar lejos"
 
-msgid "Search"
-msgstr "Buscar"
+msgid "from home, with"
+msgstr "de casa, con"
 
-msgid "City"
-msgstr "Ciudad"
+msgid "total trust"
+msgstr "total confianza"
 
-msgid "Type"
-msgstr "Tipo"
+msgid "Find verified temporary housing for your university exchange. Houses and apartments with trusted landlords throughout Colombia."
+msgstr "Encuentra alojamiento temporal verificado para tu intercambio universitario. Casas y apartamentos con arrendadores de confianza en toda Colombia."
 
-msgid "Max price"
-msgstr "Precio máximo"
+msgid "Explore listings"
+msgstr "Explorar alojamientos"
 
 msgid "How it works"
 msgstr "Cómo funciona"
 
+msgid "Listings"
+msgstr "Alojamientos"
+
+msgid "Students"
+msgstr "Estudiantes"
+
+msgid "Cities"
+msgstr "Ciudades"
+
+# ── Landing — Buscador ────────────────────────────────────────────────────────
+msgid "Find your housing"
+msgstr "Busca tu alojamiento"
+
+msgid "City"
+msgstr "Ciudad"
+
+msgid "E.g.: Bogotá, Medellín, Cali..."
+msgstr "Ej: Bogotá, Medellín, Cali..."
+
+msgid "Type"
+msgstr "Tipo"
+
+msgid "Any"
+msgstr "Cualquiera"
+
+msgid "House"
+msgstr "Casa"
+
+msgid "Apartment"
+msgstr "Apartamento"
+
+msgid "Max price"
+msgstr "Precio máximo"
+
+msgid "Search now"
+msgstr "Buscar ahora"
+
+# ── Landing — Cómo funciona ───────────────────────────────────────────────────
+msgid "Simple process"
+msgstr "Proceso simple"
+
+msgid "How does SwapStay work?"
+msgstr "¿Cómo funciona SwapStay?"
+
+msgid "Three steps to find your ideal housing"
+msgstr "Tres pasos para encontrar tu alojamiento ideal"
+
+msgid "Browse our list of verified listings. Filter by city, price, and type."
+msgstr "Busca entre nuestra lista de alojamientos verificados. Filtra por ciudad, precio y tipo."
+
+msgid "Book"
+msgstr "Reservar"
+
+msgid "Select your exchange dates and create your reservation in minutes."
+msgstr "Selecciona las fechas de tu intercambio y crea tu reserva en minutos."
+
+msgid "Enjoy"
+msgstr "Disfrutar"
+
+msgid "Receive immediate confirmation and get ready for your new temporary home."
+msgstr "Recibe confirmación inmediata y prepárate para tu nuevo hogar temporal."
+
+# ── Landing — Destacados ──────────────────────────────────────────────────────
+msgid "Available now"
+msgstr "Disponibles ahora"
+
 msgid "Featured listings"
 msgstr "Alojamientos destacados"
+
+msgid "See all"
+msgstr "Ver todos"
+
+msgid "View more"
+msgstr "Ver más"
+
+msgid "month"
+msgstr "mes"
+
+# ── Landing — CTA ─────────────────────────────────────────────────────────────
+msgid "Ready for your exchange?"
+msgstr "¿Listo para tu intercambio?"
+
+msgid "Join students who already found their home with SwapStay"
+msgstr "Únete a estudiantes que ya encontraron su hogar con SwapStay"
+
+msgid "Create free account"
+msgstr "Crear cuenta gratis"
+
+msgid "View listings"
+msgstr "Ver alojamientos"
 
 # ── Alojamientos ──────────────────────────────────────────────────────────────
 msgid "Available"
@@ -64,12 +152,6 @@ msgstr "Disponible"
 
 msgid "Not available"
 msgstr "No disponible"
-
-msgid "House"
-msgstr "Casa"
-
-msgid "Apartment"
-msgstr "Apartamento"
 
 msgid "Monthly price"
 msgstr "Precio mensual"
@@ -82,6 +164,40 @@ msgstr "Reservar ahora"
 
 msgid "View details"
 msgstr "Ver detalles"
+
+# ── Catálogo ──────────────────────────────────────────────────────────────────
+msgid "Sort by..."
+msgstr "Ordenar por..."
+
+msgid "Price: low to high"
+msgstr "Precio: menor a mayor"
+
+msgid "Price: high to low"
+msgstr "Precio: mayor a menor"
+
+msgid "Only available"
+msgstr "Solo disponibles"
+
+msgid "Show only available"
+msgstr "Mostrar solo disponibles"
+
+msgid "Apply filters"
+msgstr "Aplicar filtros"
+
+msgid "Clear"
+msgstr "Limpiar"
+
+msgid "Filters"
+msgstr "Filtros"
+
+msgid "No listings found"
+msgstr "No se encontraron alojamientos"
+
+msgid "Try other filters or explore all options"
+msgstr "Intenta con otros filtros o explora todas las opciones"
+
+msgid "See all listings"
+msgstr "Ver todos"
 
 # ── Reservas ──────────────────────────────────────────────────────────────────
 msgid "Create reservation"
@@ -111,15 +227,18 @@ msgstr "Pendiente"
 msgid "Cancelled"
 msgstr "Cancelada"
 
-# ── Dashboard ─────────────────────────────────────────────────────────────────
 msgid "My reservations"
 msgstr "Mis reservas"
 
+# ── Dashboard ─────────────────────────────────────────────────────────────────
 msgid "Total reservations"
-msgstr "Total de reservas"
+msgstr "Reservas totales"
 
 msgid "Currency converter"
 msgstr "Conversor de moneda"
+
+msgid "Hi"
+msgstr "Hola"
 
 # ── Autenticación ─────────────────────────────────────────────────────────────
 msgid "Username"

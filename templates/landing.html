@@ -1,7 +1,7 @@
 {% extends "base.html" %}
-{% load static %}
+{% load static i18n %}
 
-{% block title %}Inicio{% endblock %}
+{% block title %}{% trans "Home" %}{% endblock %}
 
 {% block content %}
 
@@ -12,26 +12,21 @@
         <div class="row align-items-center min-vh-75 py-5">
             <div class="col-lg-6 text-white">
                 <span class="badge bg-white text-primary fw-semibold px-3 py-2 mb-3 rounded-pill">
-                    <i class="fa-solid fa-star me-1"></i> Plataforma para estudiantes
+                    <i class="fa-solid fa-star me-1"></i> {% trans "Student platform" %}
                 </span>
-
                 <h1 class="display-4 fw-bold lh-sm mb-4">
-                    Tu hogar lejos<br>de casa, con<br>
-                    <span class="text-warning">total confianza</span>
+                    {% trans "Your home away" %}<br>{% trans "from home, with" %}<br>
+                    <span class="text-warning">{% trans "total trust" %}</span>
                 </h1>
-
                 <p class="fs-5 text-white-75 mb-4">
-                    Encuentra alojamiento temporal verificado para tu intercambio universitario.
-                    Casas y apartamentos con arrendadores de confianza en toda Colombia.
+                    {% trans "Find verified temporary housing for your university exchange. Houses and apartments with trusted landlords throughout Colombia." %}
                 </p>
-
                 <div class="d-flex gap-3 flex-wrap">
                     <a href="{% url 'catalogo' %}" class="btn btn-warning btn-lg fw-semibold px-4 shadow">
-                        <i class="fa-solid fa-magnifying-glass me-2"></i>Explorar alojamientos
+                        <i class="fa-solid fa-magnifying-glass me-2"></i>{% trans "Explore listings" %}
                     </a>
-
                     <a href="#como-funciona" class="btn btn-outline-light btn-lg px-4">
-                        Cómo funciona
+                        {% trans "How it works" %}
                     </a>
                 </div>
 
@@ -40,21 +35,19 @@
                     <div class="col-4">
                         <div class="text-center">
                             <div class="display-6 fw-bold text-warning">{{ total_alojamientos }}+</div>
-                            <div class="small text-white-75">Alojamientos</div>
+                            <div class="small text-white-75">{% trans "Listings" %}</div>
                         </div>
                     </div>
-
                     <div class="col-4">
                         <div class="text-center">
                             <div class="display-6 fw-bold text-warning">{{ total_estudiantes }}+</div>
-                            <div class="small text-white-75">Estudiantes</div>
+                            <div class="small text-white-75">{% trans "Students" %}</div>
                         </div>
                     </div>
-
                     <div class="col-4">
                         <div class="text-center">
                             <div class="display-6 fw-bold text-warning">{{ total_ciudades }}+</div>
-                            <div class="small text-white-75">Ciudades</div>
+                            <div class="small text-white-75">{% trans "Cities" %}</div>
                         </div>
                     </div>
                 </div>
@@ -65,64 +58,40 @@
                 <div class="card shadow-lg border-0 rounded-4 p-4">
                     <h5 class="fw-bold mb-4 text-center text-dark">
                         <i class="fa-solid fa-magnifying-glass text-primary me-2"></i>
-                        Busca tu alojamiento
+                        {% trans "Find your housing" %}
                     </h5>
-
                     <form action="{% url 'catalogo' %}" method="get">
-
                         <div class="mb-3">
-                            <label class="form-label fw-semibold small text-muted text-uppercase tracking-wide">
-                                Ciudad
-                            </label>
-
+                            <label class="form-label fw-semibold small text-muted text-uppercase tracking-wide">{% trans "City" %}</label>
                             <div class="input-group">
                                 <span class="input-group-text bg-light border-end-0">
                                     <i class="fa-solid fa-location-dot text-primary"></i>
                                 </span>
-
-                                <input type="text"
-                                       name="ciudad"
-                                       class="form-control border-start-0 ps-0"
-                                       placeholder="Ej: Bogotá, Medellín, Cali...">
+                                <input type="text" name="ciudad" class="form-control border-start-0 ps-0"
+                                       placeholder="{% trans 'E.g.: Bogotá, Medellín, Cali...' %}">
                             </div>
                         </div>
-
                         <div class="row g-2 mb-3">
-
                             <div class="col-6">
-                                <label class="form-label fw-semibold small text-muted text-uppercase">
-                                    Tipo
-                                </label>
-
+                                <label class="form-label fw-semibold small text-muted text-uppercase">{% trans "Type" %}</label>
                                 <select name="tipo" class="form-select">
-                                    <option value="">Cualquiera</option>
-                                    <option value="casa">Casa</option>
-                                    <option value="apartamento">Apartamento</option>
+                                    <option value="">{% trans "Any" %}</option>
+                                    <option value="casa">{% trans "House" %}</option>
+                                    <option value="apartamento">{% trans "Apartment" %}</option>
                                 </select>
                             </div>
-
                             <div class="col-6">
-                                <label class="form-label fw-semibold small text-muted text-uppercase">
-                                    Precio máx.
-                                </label>
-
+                                <label class="form-label fw-semibold small text-muted text-uppercase">{% trans "Max price" %}</label>
                                 <div class="input-group">
                                     <span class="input-group-text bg-light">$</span>
-
-                                    <input type="number"
-                                           name="precio_max"
-                                           class="form-control"
-                                           placeholder="COP"
-                                           step="100000">
+                                    <input type="number" name="precio_max" class="form-control"
+                                           placeholder="COP" step="100000">
                                 </div>
                             </div>
-
                         </div>
-
                         <button type="submit" class="btn btn-primary w-100 btn-lg fw-semibold">
-                            <i class="fa-solid fa-search me-2"></i>Buscar ahora
+                            <i class="fa-solid fa-search me-2"></i>{% trans "Search now" %}
                         </button>
-
                     </form>
                 </div>
             </div>
@@ -133,82 +102,42 @@
 <!-- ===== CÓMO FUNCIONA ===== -->
 <section id="como-funciona" class="py-6 bg-light">
     <div class="container">
-
         <div class="text-center mb-5">
-            <span class="badge bg-primary-subtle text-primary px-3 py-2 rounded-pill mb-3">
-                Proceso simple
-            </span>
-
-            <h2 class="fw-bold display-6">¿Cómo funciona SwapStay?</h2>
-
-            <p class="text-muted lead">
-                Tres pasos para encontrar tu alojamiento ideal
-            </p>
+            <span class="badge bg-primary-subtle text-primary px-3 py-2 rounded-pill mb-3">{% trans "Simple process" %}</span>
+            <h2 class="fw-bold display-6">{% trans "How does SwapStay work?" %}</h2>
+            <p class="text-muted lead">{% trans "Three steps to find your ideal housing" %}</p>
         </div>
-
         <div class="row g-4 justify-content-center">
-
             <div class="col-md-4">
                 <div class="card border-0 shadow-sm h-100 text-center p-4 step-card">
-
-                    <div class="step-number bg-primary text-white rounded-circle mx-auto mb-4">
-                        1
-                    </div>
-
+                    <div class="step-number bg-primary text-white rounded-circle mx-auto mb-4">1</div>
                     <div class="icon-circle bg-primary-subtle mx-auto mb-3">
                         <i class="fa-solid fa-magnifying-glass text-primary fs-4"></i>
                     </div>
-
-                    <h5 class="fw-bold">Explora</h5>
-
-                    <p class="text-muted small">
-                        Busca entre nuestra lista de alojamientos verificados.
-                        Filtra por ciudad, precio y tipo.
-                    </p>
-
+                    <h5 class="fw-bold">{% trans "Explore" %}</h5>
+                    <p class="text-muted small">{% trans "Browse our list of verified listings. Filter by city, price, and type." %}</p>
                 </div>
             </div>
-
             <div class="col-md-4">
                 <div class="card border-0 shadow-sm h-100 text-center p-4 step-card">
-
-                    <div class="step-number bg-success text-white rounded-circle mx-auto mb-4">
-                        2
-                    </div>
-
+                    <div class="step-number bg-success text-white rounded-circle mx-auto mb-4">2</div>
                     <div class="icon-circle bg-success-subtle mx-auto mb-3">
                         <i class="fa-solid fa-calendar-check text-success fs-4"></i>
                     </div>
-
-                    <h5 class="fw-bold">Reserva</h5>
-
-                    <p class="text-muted small">
-                        Selecciona las fechas de tu intercambio y crea tu reserva en minutos.
-                    </p>
-
+                    <h5 class="fw-bold">{% trans "Book" %}</h5>
+                    <p class="text-muted small">{% trans "Select your exchange dates and create your reservation in minutes." %}</p>
                 </div>
             </div>
-
             <div class="col-md-4">
                 <div class="card border-0 shadow-sm h-100 text-center p-4 step-card">
-
-                    <div class="step-number bg-warning text-white rounded-circle mx-auto mb-4">
-                        3
-                    </div>
-
+                    <div class="step-number bg-warning text-white rounded-circle mx-auto mb-4">3</div>
                     <div class="icon-circle bg-warning-subtle mx-auto mb-3">
                         <i class="fa-solid fa-house-circle-check text-warning fs-4"></i>
                     </div>
-
-                    <h5 class="fw-bold">Disfruta</h5>
-
-                    <p class="text-muted small">
-                        Recibe confirmación inmediata y prepárate para tu nuevo hogar temporal.
-                    </p>
-
+                    <h5 class="fw-bold">{% trans "Enjoy" %}</h5>
+                    <p class="text-muted small">{% trans "Receive immediate confirmation and get ready for your new temporary home." %}</p>
                 </div>
             </div>
-
         </div>
     </div>
 </section>
@@ -217,101 +146,60 @@
 {% if alojamientos_destacados %}
 <section class="py-6">
     <div class="container">
-
         <div class="d-flex justify-content-between align-items-center mb-5">
-
             <div>
-                <span class="badge bg-warning-subtle text-warning px-3 py-2 rounded-pill mb-2">
-                    Disponibles ahora
-                </span>
-
-                <h2 class="fw-bold display-6 mb-0">
-                    Alojamientos destacados
-                </h2>
+                <span class="badge bg-warning-subtle text-warning px-3 py-2 rounded-pill mb-2">{% trans "Available now" %}</span>
+                <h2 class="fw-bold display-6 mb-0">{% trans "Featured listings" %}</h2>
             </div>
-
             <a href="{% url 'catalogo' %}" class="btn btn-outline-primary fw-semibold">
-                Ver todos <i class="fa-solid fa-arrow-right ms-1"></i>
+                {% trans "See all" %} <i class="fa-solid fa-arrow-right ms-1"></i>
             </a>
-
         </div>
-
         <div class="row g-4">
-
             {% for alojamiento in alojamientos_destacados %}
-
             <div class="col-md-6 col-lg-4">
                 <div class="card border-0 shadow-sm h-100 alojamiento-card rounded-4 overflow-hidden">
-
                     {% with img=alojamiento.get_imagen_principal %}
                     {% if img %}
-
                     <div style="height:180px;overflow:hidden">
                         <img src="{{ img.imagen.url }}"
                              alt="{{ alojamiento.nombre }}"
                              style="width:100%;height:180px;object-fit:cover">
                     </div>
-
                     {% else %}
-
                     <div class="alojamiento-img-placeholder d-flex align-items-center justify-content-center"
                          style="height:180px">
-
                         <i class="fa-solid fa-{% if alojamiento.tipo == 'Casa' %}house{% else %}building{% endif %} fa-3x text-white opacity-50"></i>
-
                     </div>
-
                     {% endif %}
                     {% endwith %}
-
                     <div class="card-body p-4">
-
                         <div class="d-flex justify-content-between align-items-start mb-2">
-
-                            <h6 class="fw-bold mb-0">
-                                {{ alojamiento.nombre }}
-                            </h6>
-
-                            <span class="badge bg-success-subtle text-success">
-                                Disponible
-                            </span>
-
+                            <h6 class="fw-bold mb-0">{{ alojamiento.nombre }}</h6>
+                            <span class="badge bg-success-subtle text-success">{% trans "Available" %}</span>
                         </div>
-
                         <p class="text-muted small mb-1">
                             <i class="fa-solid fa-location-dot me-1 text-primary"></i>
                             {{ alojamiento.ciudad }}
                         </p>
-
                         <p class="text-muted small mb-3">
-                            <i class="fa-solid fa-tag me-1"></i>
-                            {{ alojamiento.tipo|default:"Alojamiento" }}
+                            <i class="fa-solid fa-tag me-1"></i>{{ alojamiento.tipo|default:"Alojamiento" }}
                         </p>
-
                         <div class="d-flex justify-content-between align-items-center">
-
                             <div>
                                 <span class="fs-5 fw-bold text-primary">
                                     ${{ alojamiento.precio_mensual|floatformat:0 }}
                                 </span>
-
-                                <span class="text-muted small">
-                                    COP/mes
-                                </span>
+                                <span class="text-muted small"> COP/{% trans "month" %}</span>
                             </div>
-
-                            <a href="{% url 'detalle_alojamiento' alojamiento.pk %}"
-                               class="btn btn-primary btn-sm px-3">
-                                Ver más
+                            <a href="{% url 'detalle_alojamiento' alojamiento.pk %}" class="btn btn-primary btn-sm px-3">
+                                {% trans "View more" %}
                             </a>
-
                         </div>
                     </div>
                 </div>
             </div>
-
             {% endfor %}
-
         </div>
     </div>
 </section>
@@ -320,37 +208,17 @@
 <!-- ===== CTA FINAL ===== -->
 <section class="py-6 bg-primary text-white">
     <div class="container text-center py-4">
-
-        <h2 class="display-6 fw-bold mb-3">
-            ¿Listo para tu intercambio?
-        </h2>
-
-        <p class="lead text-white-75 mb-4">
-            Únete a estudiantes que ya encontraron su hogar con SwapStay
-        </p>
-
+        <h2 class="display-6 fw-bold mb-3">{% trans "Ready for your exchange?" %}</h2>
+        <p class="lead text-white-75 mb-4">{% trans "Join students who already found their home with SwapStay" %}</p>
         <div class="d-flex gap-3 justify-content-center flex-wrap">
-
             {% if not request.user.is_authenticated %}
-
-            <a href="{% url 'register' %}"
-               class="btn btn-warning btn-lg fw-semibold px-5 shadow">
-
-                <i class="fa-solid fa-user-plus me-2"></i>
-                Crear cuenta gratis
-
+            <a href="{% url 'register' %}" class="btn btn-warning btn-lg fw-semibold px-5 shadow">
+                <i class="fa-solid fa-user-plus me-2"></i>{% trans "Create free account" %}
             </a>
-
             {% endif %}
-
-            <a href="{% url 'catalogo' %}"
-               class="btn btn-outline-light btn-lg px-5">
-
-                <i class="fa-solid fa-magnifying-glass me-2"></i>
-                Ver alojamientos
-
+            <a href="{% url 'catalogo' %}" class="btn btn-outline-light btn-lg px-5">
+                <i class="fa-solid fa-magnifying-glass me-2"></i>{% trans "View listings" %}
             </a>
-
         </div>
     </div>
 </section>
