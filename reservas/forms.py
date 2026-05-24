@@ -5,9 +5,24 @@ from django.core.exceptions import ValidationError
 from .models import Alojamiento, Estudiante, AlojamientoImagen
 
 
+class AlojamientoSelect(forms.Select):
+    """Widget personalizado que añade data-precio a cada opción"""
+    def create_option(self, name, value, label, selected, index, subgroup=None, attrs=None):
+        opt = super().create_option(name, value, label, selected, index, subgroup, attrs)
+        if value:
+            try:
+                precio = Alojamiento.objects.filter(pk=value).values_list('precio_mensual', flat=True).first()
+                if precio:
+                    opt['attrs']['data-precio'] = str(precio)
+            except Exception:
+                pass
+        return opt
+
+
 class ReservaForm(forms.Form):
     alojamiento = forms.ModelChoiceField(
-        queryset=Alojamiento.objects.filter(disponible=True)
+        queryset=Alojamiento.objects.filter(disponible=True),
+        widget=AlojamientoSelect
     )
     fecha_inicio = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
     fecha_fin = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))

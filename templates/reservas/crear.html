@@ -213,12 +213,35 @@
                             </div>
                         </div>
 
-                        <div class="bg-success-subtle rounded-3 p-4 text-center mb-4">
-                            <div class="text-muted small mb-1">{% trans "Costo total estimado" %}</div>
-                            <div class="display-6 fw-bold text-success"
-                                 x-text="'$' + costoEstimadoCOP.toLocaleString('es-CO')"></div>
-                            <div class="text-muted small">COP</div>
-                            <div class="text-muted small mt-1">≈ USD <span x-text="costoEstimadoUSD"></span></div>
+                        <div class="bg-success-subtle rounded-3 p-4 mb-4">
+                            <h6 class="fw-semibold mb-3 text-center">{% trans "Desglose del costo" %}</h6>
+
+                            <div class="d-flex justify-content-between small mb-1">
+                                <span class="text-muted">{% trans "Precio mensual" %}</span>
+                                <span class="fw-semibold">
+                                    $<span id="resumen-precio-mensual">—</span> COP/mes
+                                </span>
+                            </div>
+                            <div class="d-flex justify-content-between small mb-1">
+                                <span class="text-muted">{% trans "Duración" %}</span>
+                                <span class="fw-semibold" x-text="diasEstadia + ' {% trans 'días' %} (' + mesesEstadia + ' {% trans 'meses' %})'"></span>
+                            </div>
+                            <div class="d-flex justify-content-between small mb-2 text-muted fst-italic">
+                                <span>{% trans "Fórmula: precio × (días ÷ 30)" %}</span>
+                            </div>
+                            <hr class="my-2">
+                            <div class="d-flex justify-content-between fw-bold">
+                                <span>{% trans "Total estimado" %}</span>
+                                <span class="text-success fs-5"
+                                      x-text="'$' + costoEstimadoCOP.toLocaleString('es-CO') + ' COP'"></span>
+                            </div>
+                            <div class="text-muted small text-end mt-1">
+                                ≈ USD <span x-text="costoEstimadoUSD"></span>
+                            </div>
+                            <div class="alert alert-info border-0 rounded-3 small mt-3 mb-0 py-2">
+                                <i class="fa-solid fa-circle-info me-1"></i>
+                                {% trans "El monto exacto es calculado por el servidor al momento de confirmar. Puede variar en centavos por redondeo decimal." %}
+                            </div>
                         </div>
 
                         <div class="alert alert-info border-0 rounded-3 small">
@@ -302,10 +325,17 @@ function wizard({ precioMensual }) {
         },
 
         _getPrecioDelSelect() {
-            const sel = document.querySelector('[name="alojamiento"]');
+            // Intenta leer data-precio del <option> seleccionado
+            const sel = document.querySelector('select[name="alojamiento"]');
+            if (sel && sel.selectedOptions[0]) {
+                const dp = sel.selectedOptions[0].getAttribute('data-precio');
+                if (dp) return parseFloat(dp);
+            }
+            // Fallback: intentar parsear texto del option
             const texto = sel?.selectedOptions[0]?.text || '';
-            const match = texto.match(/[\d.,]+/);
-            return match ? parseFloat(match[0].replace(/[.,]/g, '')) : 1500000;
+            const match = texto.match(/\$\s*([\d.]+)/);
+            if (match) return parseFloat(match[1].replace(/\./g, ''));
+            return 0;
         },
 
         actualizarResumen() {
@@ -314,6 +344,12 @@ function wizard({ precioMensual }) {
             if (selAloj && elResumen) {
                 elResumen.textContent = selAloj.selectedOptions[0]?.text
                     || '{{ alojamiento_preseleccionado.nombre|default:"—" }}';
+            }
+            // Rellena el precio mensual visible
+            const elPrecioMensual = document.getElementById('resumen-precio-mensual');
+            if (elPrecioMensual) {
+                const p = precioMensual || this._getPrecioDelSelect();
+                elPrecioMensual.textContent = p.toLocaleString('es-CO');
             }
             this.calcularDias();
         }

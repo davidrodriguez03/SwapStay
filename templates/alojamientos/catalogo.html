@@ -129,10 +129,19 @@
                         </span>
                         {% endif %}
                     </div>
-                    <select name="orden" class="form-select form-select-sm w-auto" onchange="this.form.submit()">
-                        <option>Ordenar por...</option>
-                        <option value="precio_asc" {% if request.GET.orden == 'precio_asc' %}selected{% endif %}>Precio: menor a mayor</option>
-                        <option value="precio_desc" {% if request.GET.orden == 'precio_desc' %}selected{% endif %}>Precio: mayor a menor</option>
+                    <select class="form-select form-select-sm w-auto"
+                            onchange="aplicarOrden(this.value)">
+                        <option value="" {% if not request.GET.orden %}selected{% endif %}>
+                            Ordenar por...
+                        </option>
+                        <option value="precio_asc"
+                                {% if request.GET.orden == 'precio_asc' %}selected{% endif %}>
+                            Precio: menor a mayor
+                        </option>
+                        <option value="precio_desc"
+                                {% if request.GET.orden == 'precio_desc' %}selected{% endif %}>
+                            Precio: mayor a menor
+                        </option>
                     </select>
                 </div>
 
@@ -242,6 +251,16 @@ function catalogo() {
     return {
         precioMax: {{ request.GET.precio_max|default:'5000000' }},
     };
+}
+
+function aplicarOrden(orden) {
+    const url = new URL(window.location.href);
+    if (orden) {
+        url.searchParams.set('orden', orden);
+    } else {
+        url.searchParams.delete('orden');
+    }
+    window.location.href = url.toString();
 }
 </script>
 {% endblock %}
