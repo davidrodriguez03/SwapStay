@@ -313,6 +313,7 @@ class CrearReservaView(LoginRequiredMixin, TemplateView):
         ctx['alojamiento_preseleccionado'] = alojamiento_preseleccionado
         ctx['estudiante'] = self.request.user.estudiante
         ctx['precios_json'] = precios
+        ctx['alojamientos_disponibles'] = Alojamiento.objects.filter(disponible=True)
         return ctx
 
     def post(self, request, *args, **kwargs):

@@ -108,7 +108,15 @@
                         {% else %}
                         <div class="mb-2">
                             <label class="form-label fw-semibold">{% trans "Alojamiento disponible" %}</label>
-                            {{ form.alojamiento }}
+                            <select name="alojamiento" class="form-select" required>
+                                <option value="">-- Selecciona un alojamiento --</option>
+                                {% for a in alojamientos_disponibles %}
+                                <option value="{{ a.pk }}" data-precio="{{ a.precio_mensual }}" {% if
+                                    alojamiento_preseleccionado.pk==a.pk %}selected{% endif %}>
+                                    {{ a.nombre }} — {{ a.ciudad }}
+                                </option>
+                                {% endfor %}
+                            </select>
                             {% if form.alojamiento.errors %}
                             <div class="invalid-feedback d-block">{{ form.alojamiento.errors.0 }}</div>
                             {% endif %}
@@ -279,9 +287,19 @@
 
 {% block extra_js %}
 <script>
-    // Mapa de precios inyectado desde Django
-    const PRECIOS_ALOJAMIENTO = {{ precios_json| safe }};
-
+    const sel = document.querySelector('select[name="alojamiento"]');
+    if (sel) {
+        sel.addEventListener('change', () => {
+            const opt = sel.selectedOptions[0];
+            this.precio = parseFloat(opt?.getAttribute('data-precio') || 0);
+            this.calcularDias();
+        });
+        // Precio inicial si ya hay selección
+        if (sel.value) {
+            const opt = sel.selectedOptions[0];
+            this.precio = parseFloat(opt?.getAttribute('data-precio') || 0);
+        }
+    }
     function wizard({ precioMensual }) {
         return {
             precio: precioMensual || 0,
