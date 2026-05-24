@@ -295,3 +295,12 @@ msgstr "meses"
 
 msgid "Language"
 msgstr "Idioma"
+
+msgid "Welcome back"
+msgstr "Bienvenido de nuevo"
+
+msgid "Sign in to your SwapStay account"
+msgstr "Inicia sesión en tu cuenta SwapStay"
+
+msgid "Register for free"
+msgstr "Regístrate gratis"

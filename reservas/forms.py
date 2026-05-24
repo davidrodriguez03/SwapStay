@@ -6,8 +6,7 @@ from .models import Alojamiento, Estudiante, AlojamientoImagen
 
 class ReservaForm(forms.Form):
     alojamiento = forms.ModelChoiceField(
-        queryset=Alojamiento.objects.filter(disponible=True),
-        widget=AlojamientoSelect
+        queryset=Alojamiento.objects.filter(disponible=True)
     )
     fecha_inicio = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
     fecha_fin = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))

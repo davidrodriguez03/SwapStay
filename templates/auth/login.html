@@ -8,22 +8,22 @@
         <div class="col-md-5 col-lg-4">
             <div class="text-center mb-4">
                 <i class="fa-solid fa-house-chimney-window text-primary" style="font-size: 3rem;"></i>
-                <h3 class="fw-bold mt-3">Bienvenido de nuevo</h3>
-                <p class="text-muted">Inicia sesión en tu cuenta SwapStay</p>
+                <h3 class="fw-bold mt-3">{% trans "Welcome back" %}</h3>
+                <p class="text-muted">{% trans "Sign in to your SwapStay account" %}</p>
             </div>
 
             <div class="card border-0 shadow-sm rounded-4 p-4">
                 <form method="post">
                     {% csrf_token %}
                     <div class="mb-3">
-                        <label class="form-label fw-semibold">Usuario</label>
+                        <label class="form-label fw-semibold">{% trans "Username" %}</label>
                         <div class="input-group">
                             <span class="input-group-text bg-light"><i class="fa-solid fa-user text-muted"></i></span>
                             <input type="text" name="username" class="form-control" placeholder="tu_usuario" required autofocus>
                         </div>
                     </div>
                     <div class="mb-4">
-                        <label class="form-label fw-semibold">Contraseña</label>
+                        <label class="form-label fw-semibold">{% trans "Password" %}</label>
                         <div class="input-group">
                             <span class="input-group-text bg-light"><i class="fa-solid fa-lock text-muted"></i></span>
                             <input type="password" name="password" class="form-control" placeholder="••••••••" required>
@@ -37,7 +37,7 @@
 
             <p class="text-center text-muted mt-3 small">
                 ¿No tienes cuenta?
-                <a href="{% url 'register' %}" class="text-primary fw-semibold text-decoration-none">Regístrate gratis</a>
+                <a href="{% url 'register' %}" class="text-primary fw-semibold text-decoration-none">{% trans "Register for free" %}</a>
             </p>
         </div>
     </div>
